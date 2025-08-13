@@ -1,0 +1,6 @@
+pydantic
+sqlalchemy
+passlib
+pydantic-settings
+uvicorn
+fastapi
