@@ -1,9 +1,8 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Table
 from sqlalchemy.orm import relationship
-
 from app.db.base import Base
 
-
+# User Model
 class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
@@ -23,6 +22,7 @@ class User(Base):
 
     # one-to-many relation with projects, a user can have many projects
     projects = relationship("Project", back_populates="owner", cascade="all, delete-orphan")
+    portfolio = relationship("Portfolio", back_populates="user", uselist=False, cascade="all, delete-orphan")
 
 
 

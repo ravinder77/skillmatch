@@ -24,8 +24,7 @@ project_skills = Table(
 )
 
 
-
-
+# Project Model
 class Project(Base):
     __tablename__ = 'projects'
 
