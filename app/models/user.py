@@ -1,13 +1,7 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, Enum
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, Enum, func
 from sqlalchemy.orm import relationship
 from app.db.base import Base
-import enum
-
-class UserRole(enum.Enum):
-    ADMIN = "admin"
-    USER = "user"
-    EMPLOYER = "employer"
-
+from app.core.enums import UserRole
 
 
 # User Model
@@ -19,11 +13,11 @@ class User(Base):
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
-    role = Column(Enum(UserRole), default= UserRole.USER, nullable=True)
+    role = Column(Enum(UserRole), default= UserRole.USER, nullable=False)
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
-    updated_at = Column(DateTime, nullable=False)
-    created_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
 
     #relationships
     # one-to-many relation with skills, a user can have many skills

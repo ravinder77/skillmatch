@@ -16,8 +16,13 @@ from app.api.v1 import api_router
 from app.db.base import Base
 from app.db.session import engine
 
+# Drop all tables
+Base.metadata.drop_all(bind=engine)
+print("All tables dropped successfully.")
 
+# Create tables
 Base.metadata.create_all(bind=engine)
+print("All tables created successfully.")
 
 
 @asynccontextmanager

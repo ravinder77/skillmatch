@@ -1,17 +1,6 @@
 from pydantic import BaseModel, EmailStr, validator, Field
 from typing import Optional
-
-
-# ===========
-# Shared User Field
-# ===========
-class UserBase(BaseModel):
-    username: str = Field(min_length=7, max_length=32)
-    email: EmailStr
-    first_name: str = Field(min_length=3, max_length=32)
-    last_name: str = Field(min_length=4, max_length=32)
-    is_active: bool = Field(default=True)
-
+from app.core.enums import UserRole
 
 # ===========
 # Create User Schema
@@ -20,8 +9,9 @@ class UserCreate(BaseModel):
     username: str = Field(min_length=7, max_length=32)
     email: EmailStr
     first_name: str = Field(min_length=3, max_length=32)
-    last_name: str = Field(min_length=4, max_length=32)
+    last_name: str = Field(min_length=3, max_length=32)
     password: str = Field(min_length=8, max_length=64) #plain text hashed before saving
+    role: Optional[UserRole] = UserRole.USER
 
 
 # ============
@@ -38,8 +28,13 @@ class UserUpdate(BaseModel):
 #===========
 # User Response
 # ==========
-class UserResponse(UserBase):
+class UserResponse(BaseModel):
     id: int
+    username: str
+    first_name: str
+    last_name: str
+    email: EmailStr
+    is_active: Optional[bool] = None
 
 
     class Config:
