@@ -44,7 +44,7 @@ class Project(Base):
 
     # Relationship
     user = relationship('User', back_populates='projects')
-    skills = relationship('Skill', secondary=project_skills, back_populates='project')
+    skills = relationship('Skill', secondary=project_skills, back_populates='projects')
 
 
 

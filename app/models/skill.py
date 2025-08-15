@@ -17,7 +17,7 @@ class Skill(Base):
     # user<-->skill link
     users = relationship('UserSkill', back_populates='skill')
     # Project <--> Skill link
-    projects = relationship('Project', secondary=project_skills, back_populates='skill')
+    projects = relationship('Project', secondary=project_skills, back_populates='skills')
 
 
 

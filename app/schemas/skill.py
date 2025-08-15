@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, Field
 
@@ -17,8 +18,10 @@ class SkillResponse(BaseModel):
     id: int
     name: str = Field(min_length=3, max_length=50)
     description: Optional[str] = Field(None, min_length=3, max_length=255)
+    created_at: datetime
+    updated_at: datetime
 
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 

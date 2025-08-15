@@ -12,21 +12,24 @@ import time
 from app.core.config import settings
 from app.core.exceptions import SkillMatchException
 from app.core.middleware import register_middlewares
-
-from app.models import *
+from app.api.v1 import api_router
 from app.db.base import Base
 from app.db.session import engine
 
 
+Base.metadata.create_all(bind=engine)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-
     print("Starting SkillMatch Backend API")
     yield
+    print("Stopping SkillMatch Backend API")
 
 
 app = FastAPI(lifespan=lifespan)
 
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
 #
 register_middlewares(app)
@@ -95,7 +98,6 @@ async def health_check():
     }
     """
     return JSONResponse({"status": "ok", "timestamp": time.time()})
-
 
 
 

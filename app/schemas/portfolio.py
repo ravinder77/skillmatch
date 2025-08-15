@@ -16,3 +16,7 @@ class PortfolioUpdate(BaseModel):
     description: Optional[str] = None
     project_url: Optional[HttpUrl] = None
     image_url: Optional[HttpUrl] = None
+
+
+    class Config:
+        from_attributes = True
