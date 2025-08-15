@@ -32,6 +32,8 @@ class AuthResponse(BaseModel):
     last_name: str
     role: Optional[UserRole] = None
     access_token: str
+    refresh_token: str
+
 
 
     class Config:

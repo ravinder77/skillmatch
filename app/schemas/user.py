@@ -11,7 +11,6 @@ class UserCreate(BaseModel):
     first_name: str = Field(min_length=3, max_length=32)
     last_name: str = Field(min_length=3, max_length=32)
     password: str = Field(min_length=8, max_length=64) #plain text hashed before saving
-    role: Optional[UserRole] = UserRole.USER
 
 
 # ============
@@ -34,6 +33,7 @@ class UserResponse(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
+    role: UserRole
     is_active: Optional[bool] = None
 
 

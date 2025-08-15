@@ -1,25 +1,21 @@
 from datetime import timedelta, datetime
+from fastapi import HTTPException
 from typing import Optional
 from jose import jwt, JWTError
-from passlib.context import CryptContext
+from passlib.hash import bcrypt
 from app.core.config import settings
-from app.core.exceptions import SkillMatchException
 
-
-
-#Password Hashing Context
-context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 # Password Utilities
-
 def hash_password(password: str) -> str:
     """
     Hash a password.
     :param password: takes a plain text password and hashes it
     :return: returns the hashed password string
     """
-    return context.hash(password)
+    return bcrypt.hash(password)
+
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
@@ -28,11 +24,10 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     :param hashed_password: takes a hashed text password
     :return:
     """
-    return context.verify(plain_password, hashed_password)
+    return bcrypt.verify(plain_password, hashed_password)
 
 
 # TOKENS UTILITIES
-
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """
     Generate an access token using a JWT token.
@@ -44,10 +39,22 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     return token
 
 
+# Create Refresh Token
+def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    """
+    Generate an refresh token using a JWT token.
+    """
+    to_encode = data.copy()
+    expire = datetime.now() +(expires_delta or timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_DAYS))
+    to_encode.update({"exp": expire})
+    token = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return token
+
+
 def decode_token(token: str) -> Optional[dict]:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         return payload
     except JWTError:
-        raise SkillMatchException("Invalid or expired token", status_code=401)
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
 
