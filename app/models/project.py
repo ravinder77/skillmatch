@@ -1,11 +1,20 @@
 import enum
-
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Boolean, Text, Table, Enum
-from sqlalchemy.orm import relationship
-from app.db.base import Base
 from datetime import datetime
-import enum
 
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    String,
+    Table,
+    Text,
+)
+from sqlalchemy.orm import relationship
+
+from app.db.base import Base
 
 
 # Project Status Enum
@@ -17,19 +26,28 @@ class ProjectStatus(enum.Enum):
 
 # Association table for Many-to-Many (Projects <--> Skills)
 project_skills = Table(
-    'project_skills',
+    "project_skills",
     Base.metadata,
-    Column('project_id', Integer, ForeignKey('projects.id', ondelete='CASCADE'), nullable=False),
-    Column('skill_id', Integer, ForeignKey('skills.id', ondelete='CASCADE'), nullable=False),
+    Column(
+        "project_id",
+        Integer,
+        ForeignKey("projects.id", ondelete="CASCADE"),
+        nullable=False,
+    ),
+    Column(
+        "skill_id", Integer, ForeignKey("skills.id", ondelete="CASCADE"), nullable=False
+    ),
 )
 
 
 # Project Model
 class Project(Base):
-    __tablename__ = 'projects'
+    __tablename__ = "projects"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
 
     title = Column(String, nullable=False)
     description = Column(Text, nullable=False)
@@ -43,9 +61,5 @@ class Project(Base):
     created_at = Column(DateTime, default=datetime.now(), nullable=False)
 
     # Relationship
-    user = relationship('User', back_populates='projects')
-    skills = relationship('Skill', secondary=project_skills, back_populates='projects')
-
-
-
-
+    user = relationship("User", back_populates="projects")
+    skills = relationship("Skill", secondary=project_skills, back_populates="projects")

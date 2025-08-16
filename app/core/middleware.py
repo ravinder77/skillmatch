@@ -1,13 +1,13 @@
 import time
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi import FastAPI, Request
+
 from app.core.config import settings
 
 
-
-
-async def logging_middleware( request: Request, call_next ):
+async def logging_middleware(request: Request, call_next):
     """
     Logs method, path and execution time for each request
     """
@@ -43,7 +43,3 @@ def register_middlewares(app: FastAPI) -> None:
             TrustedHostMiddleware,
             allowed_hosts=settings.ALLOWED_HOSTS,
         )
-
-
-
-

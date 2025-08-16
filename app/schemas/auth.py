@@ -1,9 +1,9 @@
-
 import enum
-from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
-from app.core.enums import UserRole
 
+from pydantic import BaseModel, EmailStr, Field
+
+from app.core.enums import UserRole
 
 
 # Request schema for Login
@@ -33,8 +33,6 @@ class AuthResponse(BaseModel):
     role: Optional[UserRole] = None
     access_token: str
     refresh_token: str
-
-
 
     class Config:
         from_attributes = True

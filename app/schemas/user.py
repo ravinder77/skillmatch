@@ -1,6 +1,9 @@
-from pydantic import BaseModel, EmailStr, validator, Field
 from typing import Optional
+
+from pydantic import BaseModel, EmailStr, Field, validator
+
 from app.core.enums import UserRole
+
 
 # ===========
 # Create User Schema
@@ -10,7 +13,9 @@ class UserCreate(BaseModel):
     email: EmailStr
     first_name: str = Field(min_length=3, max_length=32)
     last_name: str = Field(min_length=3, max_length=32)
-    password: str = Field(min_length=8, max_length=64) #plain text hashed before saving
+    password: str = Field(
+        min_length=8, max_length=64
+    )  # plain text hashed before saving
 
 
 # ============
@@ -24,7 +29,7 @@ class UserUpdate(BaseModel):
     is_active: Optional[bool] = None
 
 
-#===========
+# ===========
 # User Response
 # ==========
 class UserResponse(BaseModel):
@@ -35,7 +40,6 @@ class UserResponse(BaseModel):
     email: EmailStr
     role: UserRole
     is_active: Optional[bool] = None
-
 
     class Config:
         from_attributes = True

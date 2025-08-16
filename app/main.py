@@ -3,69 +3,39 @@ SkillMatch Backend API
 A FastAPI application for tracking developer skills, projects,
 and generating AI-powered portfolio suggestions.
 """
-from contextlib import asynccontextmanager
+
+import time
+import uvicorn
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-import uvicorn
-import time
+from sqlalchemy import text
 
-from app.core.config import settings
-from app.core.exceptions import SkillMatchException
-from app.core.middleware import register_middlewares
 from app.api.v1 import api_router
-from app.db.base import Base
+from app.core.config import settings
+from app.core.middleware import register_middlewares
+from app.core.lifespan import lifespan
 from app.db.session import engine
-
-# Drop all tables
-Base.metadata.drop_all(bind=engine)
-print("All tables dropped successfully.")
-
-# Create tables
-Base.metadata.create_all(bind=engine)
-print("All tables created successfully.")
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    print("Starting SkillMatch Backend API")
-    yield
-    print("Stopping SkillMatch Backend API")
-
 
 app = FastAPI(lifespan=lifespan)
 
-app.include_router(api_router, prefix=settings.API_V1_STR)
-
-#
+# Register Middleware
 register_middlewares(app)
 
 
-# Exception Handler
-@app.exception_handler(SkillMatchException)
-async def skillmatch_exception_handler(request: Request, exc: SkillMatchException):
-    """
-    handle skill match exceptions
-    """
-    return JSONResponse(
-        status_code= exc.status_code,
-        content={
-            "error": True,
-            "message": exc.message,
-            "type": exc.__class__.__name__,
-            "path": request.url.path,
-            "timestamp": time.time()
-
-        }
-    )
+#Routers
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
-#Global error handler
+# Global error handler
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """
     handle global exceptions
     """
-    message = "Internal Server Error" if settings.ENVIRONMENT == "production" else str(exc)
+    message = (
+        "Internal Server Error" if settings.ENVIRONMENT == "production" else str(exc)
+    )
     return JSONResponse(
         status_code=500,
         content={
@@ -73,10 +43,9 @@ async def global_exception_handler(request: Request, exc: Exception):
             "message": message,
             "type": "InternalServerError",
             "path": request.url.path,
-            "timestamp": time.time()
-        }
+            "timestamp": time.time(),
+        },
     )
-
 
 @app.get("/")
 async def root():
@@ -91,6 +60,14 @@ async def root():
         "api_prefix": settings.API_V1_STR,
     }
 
+@app.get("/db-check")
+def db_check():
+    try:
+      with engine.connect() as conn:
+         result = conn.execute(text("SELECT 1"))
+         print("SQLite connected successfully:", result.fetchone())
+    except Exception as e:(
+        print("SQLite connection failed:", e))
 
 
 @app.get("/health")
@@ -105,13 +82,5 @@ async def health_check():
     return JSONResponse({"status": "ok", "timestamp": time.time()})
 
 
-
 if __name__ == "__main__":
-    uvicorn.run(
-        "app.main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True
-    )
-
-
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

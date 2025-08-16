@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field
 
+from pydantic import BaseModel, Field
 
 
 class SkillCreate(BaseModel):
@@ -21,7 +21,5 @@ class SkillResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-
     class Config:
         from_attributes = True
-
