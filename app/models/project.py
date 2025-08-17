@@ -1,6 +1,4 @@
-import enum
 from datetime import datetime
-
 from sqlalchemy import (
     Boolean,
     Column,
@@ -11,17 +9,12 @@ from sqlalchemy import (
     String,
     Table,
     Text,
+    func
 )
+
 from sqlalchemy.orm import relationship
-
 from app.db.base import Base
-
-
-# Project Status Enum
-class ProjectStatus(enum.Enum):
-    IN_PROGRESS = "In Progress"
-    COMPLETED = "Completed"
-    PLANNED = "Planned"
+from app.core.enums import ProjectStatus
 
 
 # Association table for Many-to-Many (Projects <--> Skills)
@@ -48,18 +41,18 @@ class Project(Base):
     user_id = Column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-
     title = Column(String, nullable=False)
     description = Column(Text, nullable=False)
     status = Column(Enum(ProjectStatus), default=ProjectStatus.IN_PROGRESS)
-
     github_url = Column(Text, nullable=True)
     demo_url = Column(Text, nullable=True)
     image_url = Column(Text, nullable=True)
-
-    updated_at = Column(DateTime, default=datetime.now(), nullable=False)
-    created_at = Column(DateTime, default=datetime.now(), nullable=False)
-
+    created_at = Column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at = Column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
     # Relationship
     user = relationship("User", back_populates="projects")
     skills = relationship("Skill", secondary=project_skills, back_populates="projects")

@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from typing import Optional
-
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm

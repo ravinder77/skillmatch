@@ -36,7 +36,7 @@ async def update_me(update_data: UserUpdate, current_user: User = Depends(get_cu
 
 
 @router.post('/reset-password', status_code=status.HTTP_200_OK)
-async def reset_password(current_user: User = Depends(get_current_user)):
+async def reset_password(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     pass
 
 
