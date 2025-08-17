@@ -1,9 +1,8 @@
 from fastapi import Depends, HTTPException, APIRouter
 from sqlalchemy.orm import Session
+from typing import Annotated
 from starlette import status
-from starlette.responses import JSONResponse
-
-from app.schemas.user import UserCreate, UserUpdate, UserResponse
+from app.schemas.user import UserUpdate, UserResponse
 from app.api.dependencies import get_current_user
 from app.models import User
 from app.db.session import get_db
@@ -13,12 +12,20 @@ router = APIRouter()
 
 
 @router.get('/me', response_model=UserResponse)
-async def read_me(current_user: User = Depends(get_current_user)):
+async def read_me(current_user: Annotated [User, Depends(get_current_user)]):
+    """
+    Returns the current authenticated user
+    """
     return current_user
 
 
-@router.put('/me', status_code=status.HTTP_200_OK)
-async def update_me(update_data: UserUpdate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+@router.put('/me', response_model=UserResponse, status_code=status.HTTP_200_OK)
+async def update_me(
+        update_data: UserUpdate,
+        current_user: Annotated[User, Depends(get_current_user)],
+        db: Annotated[Session, Depends(get_db)]):
+    """ Update the logged-in user and returns the updated record. """
+
     if update_data.username is not None:
         current_user.username = update_data.username
     if update_data.first_name is not None:
@@ -33,26 +40,24 @@ async def update_me(update_data: UserUpdate, current_user: User = Depends(get_cu
 
     return current_user
 
-
-
-@router.post('/reset-password', status_code=status.HTTP_200_OK)
-async def reset_password(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    pass
-
-
-
 @router.delete('/me', status_code=status.HTTP_204_NO_CONTENT)
-async def delete_me(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+async def delete_me(
+        current_user: Annotated[User, Depends(get_current_user)],
+        db: Annotated[Session, Depends(get_db)],) -> None:
+    """ Delete the currently authenticated user. Returns 204 NO CONTENT on success. """
 
     db.delete(current_user)
     db.commit()
 
-    return JSONResponse(
-        status_code=status.HTTP_204_NO_CONTENT,
-        content={"message": "User deleted successfully"})
+    return None
 
 
-
+@router.post('/reset-password', status_code=status.HTTP_200_OK)
+async def reset_password(
+        current_user: Annotated[User, Depends(get_current_user)],
+        db: Annotated[Session, Depends(get_db)]):
+    """ Reset password for the currently authenticated user. """
+    pass
 
 
 

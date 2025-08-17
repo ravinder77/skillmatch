@@ -68,7 +68,6 @@ async def update_skill(skill_id: int, skill_data: SkillUpdate, db: Session = Dep
     # data to be updated
     update_data = skill_data.model_dump(exclude_unset=True)
 
-
     db.query(Skill).filter(Skill.id == skill_id).update(update_data)
 
     db.commit()
