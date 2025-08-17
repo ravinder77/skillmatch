@@ -39,6 +39,8 @@ async def update_me(update_data: UserUpdate, current_user: User = Depends(get_cu
 async def reset_password(current_user: User = Depends(get_current_user)):
     pass
 
+
+
 @router.delete('/me', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_me(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
 
