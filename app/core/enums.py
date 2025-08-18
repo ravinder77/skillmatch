@@ -2,9 +2,9 @@ import enum
 
 
 class UserRole(enum.Enum):
-    ADMIN = "admin"
-    USER = "user"
+    CANDIDATE = "candidate"
     EMPLOYER = "employer"
+    ADMIN = "admin"
 
 
 # Project Status Enum
