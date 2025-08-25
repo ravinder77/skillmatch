@@ -45,7 +45,7 @@ async def signup(body: UserCreate, db: Session = Depends(get_db)):
         last_name=body.last_name,
         email=str(body.email),
         hashed_password=hashed_pw,
-        role=UserRole.USER,
+        role= body.role or UserRole.CANDIDATE,
         is_active=True,
     )
 

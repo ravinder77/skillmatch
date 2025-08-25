@@ -16,13 +16,15 @@ class UserCreate(BaseModel):
     password: str = Field(
         min_length=8, max_length=64
     )  # plain text hashed before saving
+    role: Optional[UserRole]
+    is_active: bool = True
 
 
 # ============
 # Update User Schema
 # ============
 class UserUpdate(BaseModel):
-    username: Optional[str] = Field(None, min_length=3, max_length=32)
+    username: Optional[str] = Field(None, min_length=7, max_length=32)
     first_name: Optional[str] = Field(None, min_length=3, max_length=32)
     last_name: Optional[str] = Field(None, min_length=3, max_length=32)
     password: Optional[str] = Field(None, min_length=8, max_length=64)
