@@ -1,5 +1,5 @@
 from typing import Optional, List
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class JobCreate(BaseModel):
@@ -9,6 +9,13 @@ class JobCreate(BaseModel):
     experience_required: int
     location: Optional[str]
 
+    model_config = ConfigDict(
+        from_attributes=True,
+        extra="forbid",
+        validate_by_name=True,
+        validate_by_alias=True,
+    )
+
 
 class JobUpdate(BaseModel):
     title: Optional[str] = None
@@ -16,6 +23,13 @@ class JobUpdate(BaseModel):
     skills_required: Optional[List[str]]
     experience_required: Optional[int]
     location: Optional[str]
+
+    model_config = ConfigDict(
+        from_attributes=True,
+        extra="forbid",
+        validate_by_name=True,
+        validate_by_alias=True,
+    )
 
 
 class JobResponse(BaseModel):
@@ -27,5 +41,9 @@ class JobResponse(BaseModel):
     location: Optional[str]
     employer_id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+        extra="forbid",
+        validate_by_name=True,
+        validate_by_alias=True,
+    )

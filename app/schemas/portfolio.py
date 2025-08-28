@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, HttpUrl, ConfigDict
 
 
 class PortfolioCreate(BaseModel):
@@ -9,6 +9,13 @@ class PortfolioCreate(BaseModel):
     project_url: Optional[HttpUrl] = None
     image_url: Optional[HttpUrl] = None
 
+    model_config = ConfigDict(
+        from_attributes=True,
+        extra="forbid",
+        validate_by_name=True,
+        validate_by_alias=True,
+    )
+
 
 class PortfolioUpdate(BaseModel):
     title: Optional[str] = None
@@ -16,5 +23,9 @@ class PortfolioUpdate(BaseModel):
     project_url: Optional[HttpUrl] = None
     image_url: Optional[HttpUrl] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+        extra="forbid",
+        validate_by_name=True,
+        validate_by_alias=True,
+    )

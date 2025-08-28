@@ -79,7 +79,7 @@ async def health_check():
     "timestamp": time.ctime(time.time()),
     }
     """
-    return JSONResponse({"status": "ok", "timestamp": time.time()})
+    return JSONResponse({"status": "ok"})
 
 
 if __name__ == "__main__":

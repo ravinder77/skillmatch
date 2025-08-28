@@ -1,3 +1,4 @@
+pytest
 python-jose
 starlette
 pydantic

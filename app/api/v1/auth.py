@@ -63,6 +63,7 @@ async def signup(body: UserCreate, db: Session = Depends(get_db)):
     )
 
     response = JSONResponse(
+        status_code=status.HTTP_201_CREATED,
         content={
             "id": new_user.id,
             "username": new_user.username,

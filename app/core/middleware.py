@@ -8,9 +8,7 @@ from app.core.config import settings
 
 
 async def logging_middleware(request: Request, call_next):
-    """
-    Logs method, path and execution time for each request
-    """
+    """ Logs method, path and execution time for each request """
     start_time = time.time()
     method = request.method
     response = await call_next(request)

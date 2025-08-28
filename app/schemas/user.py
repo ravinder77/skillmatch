@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
 from app.core.enums import UserRole
 
@@ -16,8 +16,16 @@ class UserCreate(BaseModel):
     password: str = Field(
         min_length=8, max_length=64
     )  # plain text hashed before saving
-    role: Optional[UserRole]
+    role: Optional[UserRole] = UserRole.CANDIDATE
     is_active: bool = True
+
+    model_config = ConfigDict(
+        orm_mode= True,
+        extra="forbid",
+        populate_by_name=True,
+        use_enum_values=True
+
+    )
 
 
 # ============
@@ -29,6 +37,13 @@ class UserUpdate(BaseModel):
     last_name: Optional[str] = Field(None, min_length=3, max_length=32)
     password: Optional[str] = Field(None, min_length=8, max_length=64)
     is_active: Optional[bool] = None
+
+    model_config = ConfigDict(
+        orm_mode = True,
+        extra="forbid",
+        validate_by_name=True,
+        use_enum_values=True
+    )
 
 
 # ===========
@@ -43,5 +58,11 @@ class UserResponse(BaseModel):
     role: UserRole
     is_active: Optional[bool] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+        extra="forbid",
+        populate_by_name=True,
+        use_enum_values=True
+    )
+
+

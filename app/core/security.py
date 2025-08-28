@@ -23,7 +23,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     Verify a hashed password against the plain text.
     :param plain_password: takes a plain text password
     :param hashed_password: takes a hashed text password
-    :return:
+    :return: verify the hashed password against the plain text and return True or False
     """
     return bcrypt.verify(plain_password, hashed_password)
 
@@ -62,5 +62,6 @@ def decode_token(token: str) -> Optional[dict]:
             token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
         return payload
+
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid or expired token")

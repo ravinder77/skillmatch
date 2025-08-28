@@ -1,5 +1,5 @@
 from typing import Optional, List
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl, ConfigDict
 from app.core.enums import ProjectStatus
 
 
@@ -13,6 +13,14 @@ class ProjectCreate(BaseModel):
     demo_url: Optional[HttpUrl] = None
     skills_id: Optional[List[int]] = []
 
+    model_config = ConfigDict(
+        from_attributes=True,
+        extra="forbid",
+        validate_by_name=True,
+        validate_by_alias=True,
+        use_enum_values=True
+    )
+
 
 class ProjectUpdate(BaseModel):
     title: Optional[str] = None
@@ -22,6 +30,14 @@ class ProjectUpdate(BaseModel):
     demo_url: Optional[HttpUrl] = None
     image_url: Optional[HttpUrl] = None
     skills_id: Optional[List[int]] = []
+
+    model_config = ConfigDict(
+        from_attributes=True,
+        extra="forbid",
+        validate_by_name=True,
+        validate_by_alias=True,
+        use_enum_values=True
+    )
 
 
 class ProjectResponse(BaseModel):
@@ -35,6 +51,10 @@ class ProjectResponse(BaseModel):
     demo_url: Optional[HttpUrl] = None
     skills_id: Optional[List[int]] = []
 
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+        extra="forbid",
+        validate_by_name=True,
+        validate_by_alias=True,
+        use_enum_values=True
+    )
