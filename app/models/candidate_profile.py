@@ -4,8 +4,8 @@ from sqlalchemy.orm import relationship
 from app.db.base import Base
 
 # curate which projects appear in the portfolio
-portfolio_featured_projects = Table(
-    "portfolio_featured_projects",
+featured_projects = Table(
+    "featured_projects",
     Base.metadata,
     Column(
         "project_id",
@@ -14,17 +14,17 @@ portfolio_featured_projects = Table(
         primary_key=True,
     ),
     Column(
-        "portfolio_id",
+        "candidate_profile_id",
         Integer,
-        ForeignKey("portfolio.id", ondelete="CASCADE"),
+        ForeignKey("candidate_profile.id", ondelete="CASCADE"),
         primary_key=True,
     ),
 )
 
 
 # Portfolio Model
-class Portfolio(Base):
-    __tablename__ = "portfolio"
+class CandidateProfile(Base):
+    __tablename__ = "candidate_profile"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
 
@@ -37,10 +37,12 @@ class Portfolio(Base):
     headline = Column(String(160), nullable=True)
     summary = Column(String(1000), nullable=True)
     location = Column(String(120), nullable=True)
+    education = Column(String(120), nullable=True)
 
     # Public Profile Urls
     github_url = Column(String, nullable=True)
     linkedin_url = Column(String, nullable=True)
+    resume_url = Column(String, nullable=True)
 
     slug = Column(String(120), unique=True, nullable=False)
     is_public = Column(Boolean, default=True, nullable=False)
@@ -50,10 +52,10 @@ class Portfolio(Base):
     updated_at = Column(DateTime, default=datetime.now(), nullable=False)
 
     # relationship
-    user = relationship("User", back_populates="portfolio", uselist=False)
-    featured_projects = relationship(
+    user = relationship("User", back_populates="profile", uselist=False)
+    projects = relationship(
         "Project",
-        secondary=portfolio_featured_projects,
+        secondary=featured_projects,
         backref="featured_in_projects",
         cascade="all",
     )

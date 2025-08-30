@@ -7,6 +7,8 @@ class JobCreate(BaseModel):
     description: str
     skills_required: List[str]
     experience_required: int
+    min_salary: int
+    max_salary: int
     location: Optional[str]
 
     model_config = ConfigDict(
@@ -22,6 +24,8 @@ class JobUpdate(BaseModel):
     description: Optional[str] = None
     skills_required: Optional[List[str]]
     experience_required: Optional[int]
+    min_salary: Optional[int]
+    max_salary: Optional[int]
     location: Optional[str]
 
     model_config = ConfigDict(
@@ -38,6 +42,8 @@ class JobResponse(BaseModel):
     description: str
     skills_required: List[str]
     experience_required: int
+    min_salary: int
+    max_salary: int
     location: Optional[str]
     employer_id: int
 

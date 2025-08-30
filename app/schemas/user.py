@@ -1,7 +1,5 @@
 from typing import Optional
-
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
-
 from app.core.enums import UserRole
 
 
@@ -20,7 +18,7 @@ class UserCreate(BaseModel):
     is_active: bool = True
 
     model_config = ConfigDict(
-        orm_mode= True,
+        from_attributes=True,
         extra="forbid",
         populate_by_name=True,
         use_enum_values=True
@@ -39,7 +37,7 @@ class UserUpdate(BaseModel):
     is_active: Optional[bool] = None
 
     model_config = ConfigDict(
-        orm_mode = True,
+        from_attributes=True,
         extra="forbid",
         validate_by_name=True,
         use_enum_values=True

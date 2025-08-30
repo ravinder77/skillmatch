@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, Annotated
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -26,7 +26,10 @@ oauth2_scheme = OAuth2PasswordBearer("auth/login")
 @router.post(
     "/signup", response_model=AuthResponse, status_code=status.HTTP_201_CREATED
 )
-async def signup(body: UserCreate, db: Session = Depends(get_db)):
+async def signup(
+        body: UserCreate,
+        db: Annotated[Session, Depends(get_db)]):
+    """ Signup endpoint for users. """
 
     # check if username exists
     if db.query(User).filter(User.username == body.username).first():
@@ -89,9 +92,8 @@ async def signup(body: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=Token, status_code=status.HTTP_200_OK)
-async def login(
-    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
-):
+async def login(form_data: OAuth2PasswordRequestForm = Depends(),
+        db: Session= Depends(get_db)):
     """
     Login endpoint using OAuth2 password flow
     """
@@ -126,6 +128,7 @@ async def login(
     response = JSONResponse(
         content={"access_token": access_token, "token_type": "bearer"}
     )
+
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
@@ -140,11 +143,10 @@ async def login(
 
 @router.post("/refresh", response_model=Token, status_code=status.HTTP_200_OK)
 async def refresh(
-    refresh_token: Optional[str] = Cookie(None), db: Session = Depends(get_db)
+    refresh_token: Optional[str] = Cookie(None),
+        db: Session = Depends(get_db)
 ):
-    """
-    Refresh access token using http-only refresh token cookies
-    """
+    """ Refresh access token using http-only refresh token cookies """
     if not refresh_token:
         raise HTTPException(status_code=401, detail="Refresh token required")
 
