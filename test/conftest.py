@@ -5,7 +5,7 @@ from app.db.base import Base
 from app.models import User
 from fastapi.testclient import TestClient
 from starlette import status
-import time
+from app.core.enums import UserRole
 from app.main import app
 from app.db.session import get_db
 from app.api.dependencies import get_current_user
@@ -64,21 +64,19 @@ def client():
 
 
 @pytest.fixture
-def default_user():
-    return User(
-        id=1,
-        username="ravinder77",
-        first_name="ravinder",
-        last_name="singh",
-        email="ravinder@gmail.com",
-        role="candidate"
-    )
+def user_payload():
+    return {
+        "username": "ravinder77",
+        "first_name": "ravinder",
+        "last_name": "singh",
+        "email": "ravinder@gmail.com",
+        "password": "ravinder123",
+        "role": UserRole.CANDIDATE.value,
+    }
 
 
 app.dependency_overrides[get_db] = override_get_db
 app.dependency_overrides[get_current_user] = override_current_user
-
-
 
 
 def test_health_check(client):

@@ -19,8 +19,8 @@ class Job(Base):
 
     posted_at = Column( DateTime(timezone=True), nullable=False, server_default=func.now())
     expires_at = Column( DateTime(timezone=True), nullable=True, server_default=func.now())
-
-    # Relation
     employer_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    employer = relationship("User", back_populates="jobs")
+
+    # Relationships
+    applications = relationship("JobApplication", back_populates="job")
 

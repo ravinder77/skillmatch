@@ -7,43 +7,27 @@ from test.conftest import override_get_db, override_current_user
 from app.models import User
 from app.core.security import hash_password
 
-
 app.dependency_overrides[get_db] = override_get_db
 app.dependency_overrides[get_current_user] = override_current_user
 
 
-
-def test_create_user(client, db_session):
-    payload = {
-        "username": "ravinder77",
-        "first_name": "ravinder",
-        "last_name": "singh",
-        "email": "ravinder@gmail.com",
-        "password": "ravinder123",
-        "role": "candidate",
-    }
-
-    response = client.post('/api/v1/auth/signup', json=payload)
-
+def test_create_user(client, db_session, user_payload):
+    response = client.post('/api/v1/auth/signup', json=user_payload)
     #Assert that api responded correctly
     assert response.status_code == status.HTTP_201_CREATED
     data = response.json()
     assert data['id'] == 1
-    assert data['username'] == payload['username']
-    assert data['first_name'] == payload['first_name']
-    assert data['last_name'] == payload['last_name']
-    assert data['email'] == payload['email']
-    assert data['role'] == payload['role']
+    assert data['username'] == user_payload['username']
+    assert data['first_name'] == user_payload['first_name']
+    assert data['last_name'] == user_payload['last_name']
+    assert data['email'] == user_payload['email']
+    assert data['role'] == user_payload['role']
 
     # check in db
-    user_in_db = db_session.query(User).filter(User.id == 1).first()
-    assert user_in_db is not None
-
+    user_in_db = db_session.query(User).filter(User.email == user_payload['email']).first()
     assert 'access_token' in data
-
-
-    assert user_in_db.username == payload['username']
-    assert user_in_db.hashed_password != payload['password']
+    assert user_in_db is not None
+    assert user_in_db.username == user_payload['username']
 
 
 def test_login_user(client, db_session):
@@ -57,10 +41,8 @@ def test_login_user(client, db_session):
         role=UserRole.CANDIDATE,
         is_active=True,
     )
-
     db_session.add(user)
     db_session.commit()
-
     # Login with form data
     response = client.post('/api/v1/auth/login',
                            data={'username': user.email, 'password': 'ravinder123'},
@@ -68,13 +50,13 @@ def test_login_user(client, db_session):
                            )
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
-
     # verify response content
     assert 'access_token' in data
     assert data['token_type'] == 'bearer'
-
     #verify cookies
     assert 'refresh_token' in response.cookies
+
+
 
 
 

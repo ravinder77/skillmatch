@@ -94,9 +94,7 @@ async def signup(
 @router.post("/login", response_model=Token, status_code=status.HTTP_200_OK)
 async def login(form_data: OAuth2PasswordRequestForm = Depends(),
         db: Session= Depends(get_db)):
-    """
-    Login endpoint using OAuth2 password flow
-    """
+    """ Login endpoint using OAuth2 password flow """
     # check if user exists
     user: Optional[User] = (
         db.query(User).filter(User.email == form_data.username).first()
@@ -116,7 +114,6 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(),
             "role": user.role.value,
         }
     )
-
     refresh_token = create_refresh_token(
         {
             "id": user.id,
@@ -149,7 +146,6 @@ async def refresh(
     """ Refresh access token using http-only refresh token cookies """
     if not refresh_token:
         raise HTTPException(status_code=401, detail="Refresh token required")
-
     try:
         payload = decode_token(refresh_token)
         user_id = payload.get("id")
@@ -162,7 +158,6 @@ async def refresh(
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-
     # create new access token
     access_token = create_access_token(
         {
@@ -171,7 +166,6 @@ async def refresh(
             "role": user.role.value,
         }
     )
-
     # also create new refresh token for rotation
     refresh_token = create_refresh_token(
         {
@@ -192,7 +186,6 @@ async def refresh(
         samesite="strict",
         max_age=7 * 24 * 60 * 60,
     )
-
     return response
 
 

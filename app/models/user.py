@@ -4,7 +4,6 @@ from sqlalchemy.orm import relationship
 from app.core.enums import UserRole
 from app.db.base import Base
 
-
 # User Model
 class User(Base):
     __tablename__ = "users"
@@ -14,7 +13,8 @@ class User(Base):
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
-    role = Column(Enum(UserRole), default=UserRole.CANDIDATE, nullable=False)
+    role = Column(Enum(UserRole, values_callable=lambda x:[e.value for e in x]),
+                  default=UserRole.CANDIDATE.value, nullable=False)
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(

@@ -20,8 +20,9 @@ class UserCreate(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
         extra="forbid",
-        populate_by_name=True,
-        use_enum_values=True
+        use_enum_values=True,
+        validate_by_name=True,
+        validate_by_alias=True,
 
     )
 

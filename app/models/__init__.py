@@ -4,4 +4,4 @@ from .skill import Skill
 from .user import User
 from .user_skill import UserSkill
 from .job import Job
-from .applications import Application
+from .job_application import JobApplication

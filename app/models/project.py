@@ -43,7 +43,7 @@ class Project(Base):
     )
     title = Column(String, nullable=False)
     description = Column(Text, nullable=False)
-    status = Column(Enum(ProjectStatus), default=ProjectStatus.IN_PROGRESS)
+    status = Column(Enum(ProjectStatus, values_callable=lambda x:[e.value for e in x]), default=ProjectStatus.IN_PROGRESS.value, nullable=False)
     github_url = Column(Text, nullable=True)
     demo_url = Column(Text, nullable=True)
     image_url = Column(Text, nullable=True)

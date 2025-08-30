@@ -7,3 +7,4 @@ passlib
 pydantic-settings
 uvicorn
 fastapi
+httpx
