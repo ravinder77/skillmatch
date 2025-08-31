@@ -1,12 +1,16 @@
 from typing import Optional, Annotated, List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from starlette import status
+import os
 from app.schemas.job import JobResponse, JobCreate, JobUpdate
-from app.models import User, Job
-from ..dependencies import get_current_employer
-
+from app.models import User, Job, CandidateProfile, JobApplication
+from ..dependencies import get_current_employer, get_current_user
 from app.db.session import get_db
+from app.utils.upload_file import upload_file_to_s3
+from app.core.config import settings
+from ...core.enums import ApplicationStatus
+from ...schemas.application import JobApplicationCreate
 
 router = APIRouter()
 
@@ -59,6 +63,104 @@ async def read_jobs_by_employer(
     jobs = db.query(Job).filter(Job.employer_id == current_employer.id).all()
 
     return jobs
+
+
+
+@router.post("/jobs/{job_id}/apply",  status_code=status.HTTP_201_CREATED)
+async def apply_job(
+        job_id: int,
+        db: Annotated[Session, Depends(get_db)],
+        current_user: Annotated[User, Depends(get_current_user)],
+        resume: UploadFile = File(None)
+):
+
+    if current_user.role != "candidate":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authorized to perform this action"
+        )
+
+    # check candidate profile exist
+    candidate = (
+        db.query(CandidateProfile)
+        .filter(CandidateProfile.user_id == current_user.id)
+        .first()
+    )
+
+    if not candidate:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="You must create a candidate profile first"
+        )
+
+    #check job exists
+    job =  db.query(Job).filter(Job.id==job_id).first()
+
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job not found"
+        )
+
+    # check if job currently accepting application
+    if not job.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Not accepting applications"
+        )
+
+    # check if you already applied for the job
+    existing_application =(
+        db.query(JobApplication)
+        .filter(JobApplication.candidate_id == candidate.id,
+        JobApplication.job_id == job.id
+    ).first()
+    )
+
+    if existing_application:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You have already applied for this job"
+        )
+
+    # upload resume
+    resume_url = None
+    if resume:
+        bucket = settings.AWS_S3_BUCKET
+        file_key = upload_file_to_s3(resume, bucket, current_user.id)
+        resume_url = f"s3://{bucket}/{file_key}"
+    else:
+        resume_url = candidate.resume_url
+
+    application = JobApplication(
+        candidate_id=candidate.id,
+        job_id=job.id,
+        resume_url=resume_url,
+        status=ApplicationStatus.APPLIED.value,
+    )
+
+    db.add(application)
+    db.commit()
+    db.refresh(application)
+
+    return {
+        "message": "Job successfully applied",
+        "application_id": application.id,
+        "status": application.status,
+        "resume_url": application.resume_url,
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

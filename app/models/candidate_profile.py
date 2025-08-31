@@ -27,7 +27,6 @@ class CandidateProfile(Base):
     __tablename__ = "candidate_profile"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-
     # one-to-one relation with user
     user_id = Column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
@@ -59,3 +58,5 @@ class CandidateProfile(Base):
         backref="featured_in_projects",
         cascade="all",
     )
+    applications = relationship("JobApplication", back_populates="candidate", cascade="all, delete-orphan")
+

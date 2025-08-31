@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text, JSON, DateTime, func
+from sqlalchemy import Column, Integer, String, ForeignKey, Text, JSON, DateTime, func, Boolean
 from sqlalchemy.orm import relationship
 
 from app.db.base import Base
@@ -16,6 +16,7 @@ class Job(Base):
     max_salary = Column(Integer, nullable=False)
     job_type = Column(String, default="Full-Time") # Full-Time, Part-Time, Contract
     location = Column(String, nullable=True, index=True)
+    is_active = Column(Boolean, nullable=False, default=True)
 
     posted_at = Column( DateTime(timezone=True), nullable=False, server_default=func.now())
     expires_at = Column( DateTime(timezone=True), nullable=True, server_default=func.now())
@@ -23,4 +24,5 @@ class Job(Base):
 
     # Relationships
     applications = relationship("JobApplication", back_populates="job")
+
 

@@ -10,12 +10,13 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     CORS_ORIGINS: List[str] = ["*"]
     ALLOWED_HOSTS: List[str] = ["*"]
-    ENVIRONMENT: str = os.getenv("ENVIRONMENT")
+    ENVIRONMENT: str = "development"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
     REFRESH_TOKEN_EXPIRE_DAYS: int = os.getenv("REFRESH_TOKEN_EXPIRE_DAYS")
     SECRET_KEY: str = os.getenv("SECRET_KEY")
     DATABASE_URL: str = os.getenv("DATABASE_URL")
+    AWS_S3_BUCKET: str = os.getenv("AWS_S3_BUCKET")
 
     class Config:
         env_file = ".env"
