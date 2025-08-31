@@ -11,3 +11,4 @@ httpx
 email-validator
 pydantic[email]
 python-multipart
+bcrypt
