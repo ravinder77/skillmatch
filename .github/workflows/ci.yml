@@ -1,12 +1,18 @@
 name: CI
 
 on:
+  push:
+    branches: ["main"]
   workflow_dispatch:
+
 
 jobs:
   test:
     runs-on: ubuntu-latest
     env:
+      ENVIRONMENT: 'test'
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      REFRESH_TOKEN_EXPIRE_DAYS: 7
       SECRET_KEY: {{secrets.TEST_SECRET_KEY}}
       DATABASE_URL: {{secrets.TEST_DATABASE_URL}}
     steps:
