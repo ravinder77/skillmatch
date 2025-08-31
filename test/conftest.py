@@ -2,9 +2,7 @@ import pytest
 from sqlalchemy import create_engine, StaticPool
 from sqlalchemy.orm import  sessionmaker
 from app.db.base import Base
-from app.models import User
 from fastapi.testclient import TestClient
-from starlette import status
 from app.core.enums import UserRole
 from app.main import app
 from app.db.session import get_db
@@ -22,8 +20,6 @@ engine = create_engine(
 )
 
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
 
 # Override FastAPI dependencies
 def override_get_db():
