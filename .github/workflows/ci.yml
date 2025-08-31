@@ -31,7 +31,7 @@ jobs:
 
       - name: Run all tests
         run: |
-          pytest tests/ -v
+          pytest -v
     
 
 
