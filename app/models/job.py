@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from sqlalchemy import Column, Integer, String, ForeignKey, Text, JSON, DateTime, func, Boolean
 from sqlalchemy.orm import relationship
 
@@ -19,7 +21,12 @@ class Job(Base):
     is_active = Column(Boolean, nullable=False, default=True)
 
     posted_at = Column( DateTime(timezone=True), nullable=False, server_default=func.now())
-    expires_at = Column( DateTime(timezone=True), nullable=True, server_default=func.now())
+    expires_at = Column(
+        DateTime(timezone=True),
+        default=lambda:datetime.now() + timedelta(days=30),
+        nullable=True
+    )
+
     employer_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
     # Relationships
