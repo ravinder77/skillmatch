@@ -71,19 +71,6 @@ def user_payload():
         "role": UserRole.CANDIDATE.value,
     }
 
-
-@pytest.fixture(scope="session", autouse=True)
-def set_test_env_vars():
-    """
-    Ensure required env vars exist during tests.
-    This avoids ValidationError from pydantic Settings.
-    """
-    os.environ.setdefault("AWS_S3_BUCKET", "test-bucket")
-    os.environ.setdefault("AWS_ACCESS_KEY_ID", "fake-access-key")
-    os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "fake-secret-key")
-    os.environ.setdefault("AWS_DEFAULT_REGION", "ap-south-1")
-
-
 app.dependency_overrides[get_db] = override_get_db
 app.dependency_overrides[get_current_user] = override_current_user
 

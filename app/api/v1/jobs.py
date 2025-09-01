@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, Annotated, List
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
@@ -81,29 +82,29 @@ async def apply_job(
         )
 
     # check candidate profile exist
-    candidate = (
+    candidate_profile = (
         db.query(CandidateProfile)
         .filter(CandidateProfile.user_id == current_user.id)
         .first()
     )
 
-    if not candidate:
+    if not candidate_profile:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="You must create a candidate profile first"
         )
 
     #check job exists
-    job =  db.query(Job).filter(Job.id==job_id).first()
+    posted_job =  db.query(Job).filter(Job.id==job_id).first()
 
-    if not job:
+    if not posted_job:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Job not found"
         )
 
     # check if job currently accepting application
-    if not job.is_active:
+    if not posted_job.is_active:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Not accepting applications"
@@ -112,8 +113,8 @@ async def apply_job(
     # check if you already applied for the job
     existing_application =(
         db.query(JobApplication)
-        .filter(JobApplication.candidate_id == candidate.id,
-        JobApplication.job_id == job.id
+        .filter(JobApplication.candidate_id == candidate_profile.id,
+        JobApplication.job_id == posted_job.id
     ).first()
     )
 
@@ -130,13 +131,17 @@ async def apply_job(
         file_key = upload_file_to_s3(resume, bucket, current_user.id)
         resume_url = f"s3://{bucket}/{file_key}"
     else:
-        resume_url = candidate.resume_url
+        resume_url = candidate_profile.resume_url
+
+    print(type(candidate_profile.id), candidate_profile.id)
+    print(type(posted_job.id), posted_job.id)
 
     application = JobApplication(
-        candidate_id=candidate.id,
-        job_id=job.id,
+        candidate_id=candidate_profile.id,
+        job_id=posted_job.id,
         resume_url=resume_url,
         status=ApplicationStatus.APPLIED.value,
+        applied_at=datetime.now()
     )
 
     db.add(application)

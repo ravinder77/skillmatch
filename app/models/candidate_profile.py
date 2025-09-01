@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table, func
 from sqlalchemy.orm import relationship
 from app.db.base import Base
 
@@ -32,6 +32,8 @@ class CandidateProfile(Base):
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
 
+    profile_image_url = Column(String, nullable=False)
+
     # Public Header Info
     headline = Column(String(160), nullable=True)
     summary = Column(String(1000), nullable=True)
@@ -47,8 +49,8 @@ class CandidateProfile(Base):
     is_public = Column(Boolean, default=True, nullable=False)
 
     # timestamps
-    created_at = Column(DateTime, default=datetime.now(), nullable=False)
-    updated_at = Column(DateTime, default=datetime.now(), nullable=False)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
     # relationship
     user = relationship("User", back_populates="profile", uselist=False)

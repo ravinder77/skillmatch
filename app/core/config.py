@@ -12,15 +12,36 @@ class Settings(BaseSettings):
     ALLOWED_HOSTS: List[str] = ["*"]
     ENVIRONMENT: str = "development"
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
-    REFRESH_TOKEN_EXPIRE_DAYS: int = os.getenv("REFRESH_TOKEN_EXPIRE_DAYS")
-    SECRET_KEY: str = os.getenv("SECRET_KEY")
-    DATABASE_URL: str = os.getenv("DATABASE_URL")
-    AWS_S3_BUCKET: str = os.getenv("AWS_S3_BUCKET")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+    REFRESH_TOKEN_EXPIRE_DAYS: int
+    SECRET_KEY: str
+    DATABASE_URL: str
+    AWS_S3_BUCKET: str
 
     class Config:
         env_file = ".env"
 
 
-# CREATE GLOBAL SETTINGS INSTANCE
-settings = Settings()
+
+class TestingSettings(Settings):
+    """Overrides with safe defaults for pytest runs."""
+    ENVIRONMENT: str = "test"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    SECRET_KEY: str = "test-secret-key"
+    DATABASE_URL: str = "sqlite:///./test.db"
+    AWS_S3_BUCKET: str = "test-bucket"
+
+
+# --- Factory for choosing the right settings ---
+def get_settings() -> Settings:
+    env = os.getenv("ENVIRONMENT", "development")
+    if env == "test" or "PYTEST_CURRENT_TEST" in os.environ:
+        return TestingSettings()
+
+    return Settings()
+
+
+settings = get_settings()
+
+
