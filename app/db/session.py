@@ -10,9 +10,7 @@ engine = create_engine(
     connect_args={"check_same_thread": False} if settings.DATABASE_URL.startswith("sqlite") else {}
 )
 
-
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
 
 # Dependency for fastapi routes
 def get_db():

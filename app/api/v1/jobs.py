@@ -1,3 +1,8 @@
+"""
+Job and Job Application Routes
+"""
+
+
 from datetime import datetime
 from typing import Optional, Annotated, List
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
@@ -11,11 +16,11 @@ from app.db.session import get_db
 from app.utils.upload_file import upload_file_to_s3
 from app.core.config import settings
 from ...core.enums import ApplicationStatus
-from ...schemas.application import JobApplicationCreate
+
 
 router = APIRouter()
 
-@router.post("/post", response_model=JobResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=JobResponse, status_code=status.HTTP_201_CREATED)
 async def create_job(
         job_data: JobCreate,
         current_employer: Annotated[User, Depends(get_current_employer)],
@@ -28,6 +33,8 @@ async def create_job(
         description=job_data.description,
         skills_required=job_data.skills_required,
         experience_required=job_data.experience_required,
+        min_salary=job_data.min_salary,
+        max_salary=job_data.max_salary,
         location=job_data.location,
         employer_id=current_employer.id,
     )
@@ -53,7 +60,7 @@ async def delete_job(
     db.commit()
 
 
-@router.get("/jobs", response_model=List[JobResponse])
+@router.get("/", response_model=List[JobResponse])
 async def read_jobs_by_employer(
         current_employer: Annotated[User, Depends(get_current_employer)],
         db: Annotated[Session, Depends(get_db)]
@@ -67,7 +74,13 @@ async def read_jobs_by_employer(
 
 
 
-@router.post("/jobs/{job_id}/apply",  status_code=status.HTTP_201_CREATED)
+
+
+# ===============
+# Candidate Route
+# ===============
+
+@router.post("/{job_id}/apply",  status_code=status.HTTP_201_CREATED)
 async def apply_job(
         job_id: int,
         db: Annotated[Session, Depends(get_db)],
@@ -75,7 +88,7 @@ async def apply_job(
         resume: UploadFile = File(None)
 ):
 
-    if current_user.role != "candidate":
+    if current_user.role.value != "candidate":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authorized to perform this action"
@@ -88,14 +101,14 @@ async def apply_job(
         .first()
     )
 
-    if not candidate_profile:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="You must create a candidate profile first"
-        )
+    # if not candidate_profile:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_404_NOT_FOUND,
+    #         detail="You must create a candidate profile first"
+    #     )
 
     #check job exists
-    posted_job =  db.query(Job).filter(Job.id==job_id).first()
+    posted_job =  db.query(Job).filter(Job.id == job_id).first()
 
     if not posted_job:
         raise HTTPException(
@@ -130,8 +143,6 @@ async def apply_job(
         bucket = settings.AWS_S3_BUCKET
         file_key = upload_file_to_s3(resume, bucket, current_user.id)
         resume_url = f"s3://{bucket}/{file_key}"
-    else:
-        resume_url = candidate_profile.resume_url
 
     print(type(candidate_profile.id), candidate_profile.id)
     print(type(posted_job.id), posted_job.id)
@@ -153,6 +164,7 @@ async def apply_job(
         "application_id": application.id,
         "status": application.status,
         "resume_url": application.resume_url,
+        
     }
 
 

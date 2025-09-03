@@ -20,7 +20,7 @@ class Job(Base):
     location = Column(String, nullable=True, index=True)
     is_active = Column(Boolean, nullable=False, default=True)
 
-    posted_at = Column( DateTime(timezone=True), nullable=False, server_default=func.now())
+    posted_at = Column( DateTime(timezone=True), server_default=func.now(), nullable=False)
     expires_at = Column(
         DateTime(timezone=True),
         default=lambda:datetime.now() + timedelta(days=30),
@@ -28,7 +28,6 @@ class Job(Base):
     )
 
     employer_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-
     # Relationships
     applications = relationship("JobApplication", back_populates="job")
 

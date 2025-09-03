@@ -43,7 +43,6 @@ class CandidateProfile(Base):
     # Public Profile Urls
     github_url = Column(String, nullable=True)
     linkedin_url = Column(String, nullable=True)
-    resume_url = Column(String, nullable=True)
 
     slug = Column(String(120), unique=True, nullable=False)
     is_public = Column(Boolean, default=True, nullable=False)
