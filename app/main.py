@@ -6,7 +6,6 @@ and generating AI-powered portfolio suggestions.
 
 import time
 import uvicorn
-
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
@@ -16,6 +15,9 @@ from app.core.config import settings
 from app.core.middleware import register_middlewares
 from app.core.lifespan import lifespan
 from app.db.session import engine
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI(lifespan=lifespan)
 

@@ -1,20 +1,25 @@
 import uuid
 import boto3
 from fastapi import UploadFile
+from botocore.exceptions import ClientError, BotoCoreError
 
 s3_client = boto3.client('s3')
 
 def upload_file_to_s3(file: UploadFile, bucket_name: str, user_id: int) -> str:
-    file_extension = file.filename.split('.')[-1]
-    file_key = f"resumes/{user_id}{uuid.uuid4()}.{file_extension}"
+    try:
+        file_extension = file.filename.split('.')[-1]
+        file_key = f"resumes/{user_id}{uuid.uuid4()}/{file.filename}"
 
-    s3_client.upload_file(
-        file.file,
-        bucket_name,
-        file_key,
-        ExtraArgs={"ContentType": file.content_type, "ACL": "private"},
-    )
+        s3_client.upload_fileobj(
+            file.file,
+            bucket_name,
+            file_key,
+            ExtraArgs={"ContentType": file.content_type, "ACL": "private"},
+        )
 
-    return file_key  # store key in db
+        return file_key  # store key in db
+    except (BotoCoreError, ClientError) as e:
+        raise RuntimeError(f"Error uploading file to S3: {str(e)}")
+
 
 

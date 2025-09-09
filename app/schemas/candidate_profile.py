@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from pydantic import BaseModel, HttpUrl, ConfigDict
 from typing import Optional, List
+from app.core.enums import ApplicationStatus
 
 
 class CandidateProfileCreate(BaseModel):
@@ -73,7 +76,4 @@ class CandidateProfilePublicView(BaseModel):
         validate_by_name=True,
         validate_by_alias=True,
     )
-
-
-
 

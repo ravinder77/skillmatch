@@ -1,14 +1,11 @@
 """
 Job and Job Application Routes
 """
-
-
 from datetime import datetime
 from typing import Optional, Annotated, List
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from starlette import status
-import os
 from app.schemas.job import JobResponse, JobCreate, JobUpdate
 from app.models import User, Job, CandidateProfile, JobApplication
 from ..dependencies import get_current_employer, get_current_user
@@ -17,6 +14,8 @@ from app.utils.upload_file import upload_file_to_s3
 from app.core.config import settings
 from ...core.enums import ApplicationStatus
 
+from ...schemas.application import CandidateApplication, JobApplicationResponse
+from ...services.parser_service import extract_text_from_resume
 
 router = APIRouter()
 
@@ -60,27 +59,11 @@ async def delete_job(
     db.commit()
 
 
-@router.get("/", response_model=List[JobResponse])
-async def read_jobs_by_employer(
-        current_employer: Annotated[User, Depends(get_current_employer)],
-        db: Annotated[Session, Depends(get_db)]
-):
-    """
-    Retrieve all jobs associated with employer
-    """
-    jobs = db.query(Job).filter(Job.employer_id == current_employer.id).all()
-
-    return jobs
-
-
-
-
 
 # ===============
 # Candidate Route
 # ===============
-
-@router.post("/{job_id}/apply",  status_code=status.HTTP_201_CREATED)
+@router.post("/{job_id}/apply", response_model=JobApplicationResponse,  status_code=status.HTTP_201_CREATED)
 async def apply_job(
         job_id: int,
         db: Annotated[Session, Depends(get_db)],
@@ -94,18 +77,14 @@ async def apply_job(
             detail="Not authorized to perform this action"
         )
 
+
+
     # check candidate profile exist
     candidate_profile = (
         db.query(CandidateProfile)
         .filter(CandidateProfile.user_id == current_user.id)
         .first()
     )
-
-    # if not candidate_profile:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_404_NOT_FOUND,
-    #         detail="You must create a candidate profile first"
-    #     )
 
     #check job exists
     posted_job =  db.query(Job).filter(Job.id == job_id).first()
@@ -137,16 +116,25 @@ async def apply_job(
             detail="You have already applied for this job"
         )
 
+
+    #upload Resume and Parse it
+    parsed_text = extract_text_from_resume(resume)
+
+
     # upload resume
-    resume_url = None
+    resume_url: Optional[str] = None
     if resume:
-        bucket = settings.AWS_S3_BUCKET
-        file_key = upload_file_to_s3(resume, bucket, current_user.id)
-        resume_url = f"s3://{bucket}/{file_key}"
+        try:
+            bucket = settings.AWS_S3_BUCKET
+            file_key = upload_file_to_s3(resume, bucket, current_user.id)
+            resume_url = f"s3://{bucket}/{file_key}"
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Resume upload failed: {str(e)}"
+            )
 
-    print(type(candidate_profile.id), candidate_profile.id)
-    print(type(posted_job.id), posted_job.id)
-
+    # Create Job Application
     application = JobApplication(
         candidate_id=candidate_profile.id,
         job_id=posted_job.id,
@@ -155,17 +143,52 @@ async def apply_job(
         applied_at=datetime.now()
     )
 
-    db.add(application)
-    db.commit()
-    db.refresh(application)
+    try:
+        db.add(application)
+        db.commit()
+        db.refresh(application)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to apply application: {str(e)}"
+        )
 
-    return {
-        "message": "Job successfully applied",
-        "application_id": application.id,
-        "status": application.status,
-        "resume_url": application.resume_url,
-        
-    }
+
+    return JobApplicationResponse(
+        message= "Job applied Successfully",
+        id=application.id,
+        status=application.status,
+        resume_url=application.resume_url,
+        applied_at=datetime.now()
+    )
+
+
+
+@router.get("/{job_id}/candidates", status_code=status.HTTP_200_OK)
+async def get_job_applications(
+        job_id: int,
+        db: Annotated[Session, Depends(get_db)],
+        current_user: Annotated[User, Depends(get_current_employer)],
+):
+
+    job = db.query(Job).filter(Job.id == job_id).first()
+
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job not found"
+        )
+
+    applications = (
+        db.query(JobApplication)
+        .filter(JobApplication.job_id == job.id)
+        .all()
+    )
+
+    return applications
+
+
 
 
 
