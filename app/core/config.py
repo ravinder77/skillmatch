@@ -1,6 +1,6 @@
 import os
 from typing import List
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -17,9 +17,15 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     DATABASE_URL: str
     AWS_S3_BUCKET: str
+    EMAIL_HOST: str = "smtp.gmail.com"
+    EMAIL_PORT: int = 587
+    EMAIL_USER: str
+    EMAIL_PASSWORD: str
+    EMAIL_FROM: str
 
-    class Config:
-        env_file = ".env"
+
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
 
 
 
@@ -31,6 +37,7 @@ class TestingSettings(Settings):
     SECRET_KEY: str = "test-secret-key"
     DATABASE_URL: str = "sqlite:///./test.db"
     AWS_S3_BUCKET: str = "test-bucket"
+
 
 
 # --- Factory for choosing the right settings ---

@@ -169,8 +169,14 @@ async def apply_job(
 async def get_job_applications(
         job_id: int,
         db: Annotated[Session, Depends(get_db)],
-        current_user: Annotated[User, Depends(get_current_employer)],
+        employer: Annotated[User, Depends(get_current_employer)],
 ):
+
+    if employer.role.value != "employer":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authorized to perform this action"
+        )
 
     job = db.query(Job).filter(Job.id == job_id).first()
 
@@ -178,6 +184,12 @@ async def get_job_applications(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Job not found"
+        )
+
+    if employer.id != job.employer_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authorized to perform this action"
         )
 
     applications = (
