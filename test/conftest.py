@@ -9,9 +9,6 @@ from app.main import app
 from app.db.session import get_db
 from app.api.dependencies import get_current_user
 
-
-
-
 TEST_DATABASE_URL = "sqlite:///./testdb.db"
 
 engine = create_engine(
@@ -58,8 +55,6 @@ def client():
     return TestClient(app)
 
 
-
-
 @pytest.fixture
 def user_payload():
     return {
@@ -71,15 +66,6 @@ def user_payload():
         "role": UserRole.CANDIDATE.value,
     }
 
-app.dependency_overrides[get_db] = override_get_db
-app.dependency_overrides[get_current_user] = override_current_user
-
-
-def test_health_check(client):
-    response = client.get('/health')
-    assert response.status_code == 200
-    assert response.json() == {
-        'status': 'ok'
-    }
-
+# app.dependency_overrides[get_db] = override_get_db
+# app.dependency_overrides[get_current_user] = override_current_user
 

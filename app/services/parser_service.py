@@ -7,20 +7,19 @@ import json
 import os
 import PyPDF2
 
+from app.core.config import settings
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
+client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
 
 def extract_text_from_resume(file: UploadFile) -> str:
-    if file.filename.endswith(".pdf"):
-        reader = PyPDF2.PdfFileReader(file.filename)
-        text = ""
-        for page in reader.pages:
-            text += page.extract_text()
-        return text
-    else:
+    if not file.filename.endswith(".pdf"):
         raise ValueError("Unsupported file type")
+    reader = PyPDF2.PdfReader(file.file)
+    text = ""
+    for page in reader.pages:
+        text += page.extract_text() or ""
+    return text.strip()
 
 
 def parse_resume(text: str) -> dict:
@@ -36,7 +35,7 @@ def parse_resume(text: str) -> dict:
     - experience (list of {{company, role, years}})
     - education (list of {{degree, institution, years}})
     - achievements (list of {{achievement, years}})
-    
+
     Resume Text: {text}
     """
 
@@ -47,8 +46,11 @@ def parse_resume(text: str) -> dict:
     )
 
     try:
-        parsed_resume = json.loads(response.output_text)
-    except Exception:
-        parsed_resume = {"raw_output": response.output_text}
+        parsed_resume = json.loads(response.output[0].content[0].text)
+    except Exception as e:
+        parsed_resume = {
+            "error": str(e),
+            "raw_output": response.output_text
+        }
 
     return parsed_resume

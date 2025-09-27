@@ -2,11 +2,11 @@
 Job and Job Application Routes
 """
 from datetime import datetime
-from typing import Optional, Annotated, List
+from typing import Optional, Annotated
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from starlette import status
-from app.schemas.job import JobResponse, JobCreate, JobUpdate
+from app.schemas.job import JobResponse, JobCreate
 from app.models import User, Job, CandidateProfile, JobApplication
 from ..dependencies import get_current_employer, get_current_user
 from app.db.session import get_db
@@ -48,9 +48,9 @@ async def create_job(
 @router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_job(
         job_id: int,
-        current_user: Annotated[User, Depends(get_current_employer)],
         db: Annotated[Session, Depends(get_db)]
 ):
+
     job = db.query(Job).filter(Job.id == job_id).first()
     if not job:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
@@ -87,7 +87,7 @@ async def apply_job(
     )
 
     #check job exists
-    posted_job =  db.query(Job).filter(Job.id == job_id).first()
+    posted_job = db.query(Job).filter(Job.id == job_id).first()
 
     if not posted_job:
         raise HTTPException(
@@ -119,6 +119,7 @@ async def apply_job(
 
     #upload Resume and Parse it
     parsed_text = extract_text_from_resume(resume)
+
 
 
     # upload resume
@@ -161,6 +162,7 @@ async def apply_job(
         status=application.status,
         resume_url=application.resume_url,
         applied_at=datetime.now()
+
     )
 
 

@@ -1,6 +1,7 @@
 import os
 from typing import List
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from functools import lru_cache
 
 
 class Settings(BaseSettings):
@@ -12,21 +13,13 @@ class Settings(BaseSettings):
     ALLOWED_HOSTS: List[str] = ["*"]
     ENVIRONMENT: str = "development"
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int
-    REFRESH_TOKEN_EXPIRE_DAYS: int
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     SECRET_KEY: str
     DATABASE_URL: str
-    AWS_S3_BUCKET: str
-    EMAIL_HOST: str = "smtp.gmail.com"
-    EMAIL_PORT: int = 587
-    EMAIL_USER: str
-    EMAIL_PASSWORD: str
-    EMAIL_FROM: str
-
+    OPENAI_API_KEY: str
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
-
-
 
 
 class TestingSettings(Settings):
@@ -36,16 +29,17 @@ class TestingSettings(Settings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     SECRET_KEY: str = "test-secret-key"
     DATABASE_URL: str = "sqlite:///./test.db"
-    AWS_S3_BUCKET: str = "test-bucket"
+
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 
 
 # --- Factory for choosing the right settings ---
+@lru_cache
 def get_settings() -> Settings:
     env = os.getenv("ENVIRONMENT", "development")
     if env == "test" or "PYTEST_CURRENT_TEST" in os.environ:
         return TestingSettings()
-
     return Settings()
 
 

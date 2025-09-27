@@ -12,10 +12,10 @@ passlib
 pydantic-settings
 uvicorn
 fastapi
-smtplib
 httpx
 email-validator
 pydantic[email]
 python-multipart
 bcrypt
 jinja2
+
