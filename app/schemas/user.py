@@ -11,9 +11,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     first_name: str = Field(min_length=3, max_length=32)
     last_name: str = Field(min_length=3, max_length=32)
-    password: str = Field(
-        min_length=8, max_length=64
-    )  # plain text hashed before saving
+    password: str = Field(min_length=8, max_length=64)  # plain text hashed before saving
     role: Optional[UserRole] = UserRole.CANDIDATE
     is_active: bool = True
 
@@ -60,8 +58,6 @@ class UserResponse(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
         extra="forbid",
-        populate_by_name=True,
+        validate_by_name=True,
         use_enum_values=True
     )
-
-

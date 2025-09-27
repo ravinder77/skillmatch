@@ -42,7 +42,6 @@ class AuthResponse(BaseModel):
     last_name: str
     role: Optional[UserRole] = None
     access_token: str
-    refresh_token: str
 
     model_config = ConfigDict(
         from_attributes=True,
@@ -50,4 +49,17 @@ class AuthResponse(BaseModel):
         validate_by_name=True,
         validate_by_alias=True,
         use_enum_values=True,
+    )
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str
+
+    model_config = ConfigDict(
+        from_attributes=True,
+        extra="forbid",
+        validate_by_name=True,
+        validate_by_alias=True,
     )
