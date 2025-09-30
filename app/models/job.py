@@ -1,22 +1,22 @@
 from datetime import datetime, timedelta
 from typing import Optional, List
-from sqlalchemy import Column, Integer, String, ForeignKey, Text, JSON, DateTime, func, Boolean
+from sqlalchemy import Integer, String, ForeignKey, Text, JSON, DateTime, func, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from app.db.base import Base
+from app.db.mixins import TimestampMixin
 from app.models.job_application import JobApplication
 
 
-class Job(Base):
+class Job(Base, TimestampMixin):
     __tablename__ = "jobs"
-    id:Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    title:Mapped[str] = mapped_column(String, nullable=False, index=True) # candidates search job by name so index improves performance
+    id:Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    title:Mapped[str] = mapped_column(String(150), nullable=False, index=True) # candidates search job by name so index improves performance
     description:Mapped[str] = mapped_column(Text, nullable=False)
     skills_required:Mapped[List[str]] = mapped_column(JSON, nullable=False)
     experience_required:Mapped[int] = mapped_column(Integer, nullable=False)
     min_salary:Mapped[int] = mapped_column(Integer, nullable=False)
     max_salary:Mapped[int] = mapped_column(Integer, nullable=False)
-    job_type:Mapped[str] = mapped_column(String, default="Full-Time") # Full-Time, Part-Time, Contract
+    job_type:Mapped[str] = mapped_column(String(50), default="Full-Time") # Full-Time, Part-Time, Contract
     location:Mapped[Optional[str]]= mapped_column(String, nullable=True, index=True)
     is_active:Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
@@ -28,7 +28,9 @@ class Job(Base):
         nullable=True
     )
 
+    #
     employer_id:Mapped[int]= mapped_column(ForeignKey("users.id"), nullable=False)
+
     # Relationships
     applications:Mapped[List["JobApplication"]] = relationship("JobApplication", back_populates="job")
 

@@ -1,20 +1,17 @@
-from datetime import datetime
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
-from sqlalchemy.orm import relationship
-
+from sqlalchemy.orm import relationship, Mapped
+from sqlalchemy.testing.schema import mapped_column
 from app.db.base import Base
+from app.db.mixins import TimestampMixin
 from app.models.project import project_skills
 
 
-class Skill(Base):
+class Skill(Base, TimestampMixin):
     __tablename__ = "skills"
-    id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
-    description = Column(Text, nullable=False)
-
-    created_at = Column(DateTime, default=datetime.now(), nullable=False)
-    updated_at = Column(DateTime, default=datetime.now(), nullable=False)
+    id:Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name:Mapped[str] = mapped_column(String(50), nullable=False)
+    description:Mapped[str] = mapped_column(Text, nullable=False)
 
     # user<-->skill link
     users = relationship("UserSkill", back_populates="skill")

@@ -1,21 +1,12 @@
-from datetime import datetime
-from sqlalchemy import (
-    Boolean,
-    Column,
-    DateTime,
-    Enum,
-    ForeignKey,
-    Integer,
-    String,
-    Table,
-    Text,
-    func
-)
-
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Enum, ForeignKey, Integer, String, Table, Text
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+from typing import Optional,List
 from app.db.base import Base
+from app.models.candidate_profile import CandidateProfile
+from app.models.skill import Skill
+from app.models.user import User
 from app.core.enums import ProjectStatus
-
+from app.db.mixins import TimestampMixin, SoftDeleteMixin
 
 # Association table for Many-to-Many (Projects <--> Skills)
 project_skills = Table(
@@ -34,25 +25,35 @@ project_skills = Table(
 
 
 # Project Model
-class Project(Base):
+class Project(Base, TimestampMixin):
     __tablename__ = "projects"
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(
+    id:Mapped[int] = mapped_column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id:Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    title = Column(String, nullable=False)
-    description = Column(Text, nullable=False)
-    status = Column(Enum(ProjectStatus, values_callable=lambda x:[e.value for e in x]), default=ProjectStatus.IN_PROGRESS.value, nullable=False)
-    github_url = Column(Text, nullable=True)
-    demo_url = Column(Text, nullable=True)
-    image_url = Column(Text, nullable=True)
-    created_at = Column(
-        DateTime(timezone=True), nullable=False, server_default=func.now()
+    title:Mapped[str] = mapped_column(String(100), nullable=False)
+    description:Mapped[str] = mapped_column(Text, nullable=False)
+
+    status:Mapped[ProjectStatus] = mapped_column(
+        Enum(ProjectStatus, values_callable=lambda x:[e.value for e in x], native_enum=False),
+        default=ProjectStatus.IN_PROGRESS,
+        nullable=False
     )
-    updated_at = Column(
-        DateTime(timezone=True), nullable=False, server_default=func.now()
-    )
+    github_url:Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    demo_url:Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    image_url:Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
     # Relationship
-    user = relationship("User", back_populates="projects")
-    skills = relationship("Skill", secondary=project_skills, back_populates="projects")
+    user:Mapped["User"] = relationship("User", back_populates="projects")
+    #foreign key to Candidate Profile
+    candidate_profile_id:Mapped[int] = mapped_column(
+        Integer, ForeignKey("candidate_profiles.id", ondelete="CASCADE"), nullable=False
+    )
+    # relationship back to candidate Profile
+    candidate_profile:Mapped["CandidateProfile"] = relationship(
+        "CandidateProfile",
+        back_populates="projects",
+    )
+    # one to many with skills
+    skills:Mapped[List["Skill"]] = relationship("Skill", secondary=project_skills, back_populates="projects")
