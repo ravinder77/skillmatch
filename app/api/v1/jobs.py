@@ -1,21 +1,24 @@
 """
 Job and Job Application Routes
 """
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from datetime import datetime
 from typing import Optional, Annotated
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from starlette import status
 from app.schemas.job import JobResponse, JobCreate
-from app.models import User, Job, CandidateProfile, JobApplication
+from app.models.user import User
 from ..dependencies import get_current_employer, get_current_user
 from app.db.session import get_db
 from app.utils.upload_file import upload_file_to_s3
 from app.core.config import settings
 from ...core.enums import ApplicationStatus
+from ...models.candidate_profile import CandidateProfile
+from ...models.job import Job
+from ...models.job_application import JobApplication
 
-from ...schemas.application import CandidateApplication, JobApplicationResponse
-from ...services.parser_service import extract_text_from_resume
+from ...schemas.application import JobApplicationResponse
+
 
 router = APIRouter()
 
@@ -115,10 +118,6 @@ async def apply_job(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="You have already applied for this job"
         )
-
-
-    #upload Resume and Parse it
-    parsed_text = extract_text_from_resume(resume)
 
 
 

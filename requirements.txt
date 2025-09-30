@@ -1,4 +1,6 @@
-pypdf2
+fastapi
+SQLAlchemy>=2.0.43
+pydantic>=2.11.0
 python-dotenv
 openai
 botocore
@@ -6,12 +8,9 @@ boto3
 pytest
 python-jose
 starlette
-pydantic
-sqlalchemy
 passlib
 pydantic-settings
 uvicorn
-fastapi
 httpx
 email-validator
 pydantic[email]

@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.api.dependencies import get_current_employer
 from app.schemas.job import JobResponse
-from app.models import User, Job
+from app.models.user import User
+from app.models.job import Job
 
 
 

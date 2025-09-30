@@ -1,11 +1,10 @@
-from datetime import datetime, timedelta
 from typing import Optional, Annotated
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.db.session import get_db
-from app.schemas.auth import AuthResponse, Token, TokenData
+from app.schemas.auth import AuthResponse, Token
 from app.schemas.user import UserCreate
 from app.services import auth as auth_service
 

@@ -6,7 +6,7 @@ from app.core.security import (
 from app.schemas.auth import AuthResponse
 from app.schemas.user import UserCreate
 from sqlalchemy.orm import Session
-from app.models import User
+from app.models.user import User
 from app.core.enums import UserRole
 from app.repositories import auth as auth_repository
 
@@ -27,6 +27,7 @@ def signup_user(db: Session, body: UserCreate) -> tuple[AuthResponse, str]:
         role=body.role or UserRole.CANDIDATE,
         is_active=True,
     )
+
 
     auth_repository.create_user(db, new_user)
     access_token, refresh_token = generate_tokens(new_user)
