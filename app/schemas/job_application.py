@@ -17,14 +17,12 @@ class JobApplicationCreate(BaseModel):
         use_enum_values=True,
     )
 
-
 class JobApplicationResponse(BaseModel):
     id: int
     message: str
     status: ApplicationStatus
     resume_url: str
     applied_at: datetime
-
 
 class CandidateApplication(BaseModel):
     id: int

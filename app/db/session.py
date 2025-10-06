@@ -2,8 +2,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 
-
-
 # For SQLite only: connect_args is required
 engine = create_engine(
     settings.DATABASE_URL,

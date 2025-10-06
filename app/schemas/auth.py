@@ -10,7 +10,7 @@ from app.core.enums import UserRole
 # Response schema for JWT Token
 class Token(BaseModel):
     access_token: str
-    token_type: str
+    token_type: str = 'bearer'
 
     model_config = ConfigDict(
         from_attributes=True,

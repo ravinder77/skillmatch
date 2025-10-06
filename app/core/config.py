@@ -1,5 +1,6 @@
 import os
 from typing import List
+from pydantic import ValidationError
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
 
@@ -30,19 +31,29 @@ class TestingSettings(Settings):
     SECRET_KEY: str = "test-secret-key"
     DATABASE_URL: str = "sqlite:///./test.db"
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
+class ProductionSettings(Settings):
+    ENVIRONMENT: str = "production"
+    DEBUG: bool = False
 
 
 
 # --- Factory for choosing the right settings ---
 @lru_cache
 def get_settings() -> Settings:
-    env = os.getenv("ENVIRONMENT", "development")
-    if env == "test" or "PYTEST_CURRENT_TEST" in os.environ:
+    env = os.getenv("ENVIRONMENT", "development").lower()
+    if env == "test" or os.getenv("PYTEST_CURRENT_TEST"):
         return TestingSettings()
+    elif env == "production":
+        return ProductionSettings()
     return Settings()
 
 
-settings = get_settings()
+
+try:
+    settings = get_settings()
+except ValidationError as e:
+    raise RuntimeError("Missing critical environment variables. Please check your .env file.") from e
+
 
 

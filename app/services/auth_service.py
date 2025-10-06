@@ -8,13 +8,13 @@ from app.schemas.user import UserCreate
 from sqlalchemy.orm import Session
 from app.models.user import User
 from app.core.enums import UserRole
-from app.repositories import auth as auth_repository
+from app.repositories import users_repository
 
 
 def signup_user(db: Session, body: UserCreate) -> tuple[AuthResponse, str]:
-    if auth_repository.get_user_by_username(db, body.username):
+    if users_repository.get_by_username(db, body.username):
         raise HTTPException(status_code=400, detail="Username already exists")
-    if auth_repository.get_user_by_email(db, str(body.email)):
+    if users_repository.get_by_email(db, str(body.email)):
         raise HTTPException(status_code=400, detail="Email already exists")
 
     # build sqlalchemy model
@@ -24,12 +24,12 @@ def signup_user(db: Session, body: UserCreate) -> tuple[AuthResponse, str]:
         last_name=body.last_name,
         email=str(body.email),
         hashed_password=hash_password(body.password),
-        role=body.role or UserRole.CANDIDATE,
+        role=UserRole.CANDIDATE,
         is_active=True,
     )
 
 
-    auth_repository.create_user(db, new_user)
+    users_repository.create_user(db, new_user)
     access_token, refresh_token = generate_tokens(new_user)
 
     auth_body =  AuthResponse(
@@ -46,8 +46,8 @@ def signup_user(db: Session, body: UserCreate) -> tuple[AuthResponse, str]:
 
 
 def login_user(db: Session, email: str, password: str) -> tuple[str, str]:
-    user = auth_repository.get_user_by_email(db, email)
-    if not user or not verify_password(password, user.hashed_password):
+    user = users_repository.get_by_email(db, email)
+    if not user or not verify_password(password, str(user.hashed_password)):
         raise HTTPException(status_code=400, detail="Incorrect email or password")
 
     access_token, refresh_token = generate_tokens(user)
@@ -63,7 +63,7 @@ def refresh_user_session(db: Session, refresh_token: str) -> tuple[str, str]:
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
-    user = auth_repository.get_user_by_id(db, user_id)
+    user = users_repository.get_by_id(db, user_id)
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
