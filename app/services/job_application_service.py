@@ -1,43 +1,35 @@
 from typing import Optional, List
 from fastapi import HTTPException
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 from starlette import status
 
-from app.models.candidate_profile import CandidateProfile
-from app.models.job import Job
 from app.models.job_application import JobApplication
-from app.repositories import job_application_repository
+from app.repositories import job_application_repository, candidate_profile_repository, job_repository
 from app.core.config import settings
 from app.utils.upload_file import upload_file_to_s3
 
-
-async def apply_to_job(
+def apply_to_job(
         db: Session,
-        candidate_user_id: int,
+        user_id: int,
         job_id: int,
         resume_file: Optional = None
 ) -> JobApplication:
 
-    candidate_profile = db.execute(
-        select(CandidateProfile).where(CandidateProfile.user_id == candidate_user_id)
-    ).scalar_one_or_none()
+    candidate_profile = candidate_profile_repository.get_profile_by_id(db, user_id)
 
     if not candidate_profile:
         raise HTTPException(status_code=404, detail="Candidate profile not found")
 
     # Fetch Job
-    job = db.execute(
-        select(Job).where(Job.id == job_id)
-    ).scalar_one_or_none()
+    job = job_repository.get_by_id(db, job_id)
 
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     if not job.is_active:
-        raise HTTPException(status_code=404, detail="Not accepting application currently")
+        raise HTTPException(status_code=400, detail="Not accepting application currently")
 
     # Check if already applied for the job
-    existing_application = job_application_repository.get_by_candidate_and_job(db, candidate_profile.id, job.id)
+    existing_application = job_application_repository.get_by_candidate_and_job(db, job_id, candidate_profile.id)
     if existing_application:
         raise HTTPException(status_code=400, detail="You have already applied for this job")
 
@@ -46,7 +38,7 @@ async def apply_to_job(
     if resume_file:
         try:
             bucket = settings.AWS_S3_BUCKET
-            file_key = upload_file_to_s3(resume_file, bucket, candidate_user_id)
+            file_key = upload_file_to_s3(resume_file, bucket, user_id)
             resume_url = f"s3://{bucket}/{file_key}"
         except Exception as e:
             raise HTTPException(
@@ -67,39 +59,37 @@ async def apply_to_job(
 # ----------------------------------------------------------
 # Get All Applications by a Candidate
 # ----------------------------------------------------------
-async def get_all_applications_by_user(
+def get_all_applications_by_user(
         db: Session,
-        candidate_user_id: int,
+        user_id: int,
 ) -> List[JobApplication]:
 
-    candidate_profile = db.execute(
-        select(CandidateProfile).where(CandidateProfile.user_id == candidate_user_id)
-    ).scalar_one_or_none()
+    candidate_profile = candidate_profile_repository.get_profile_by_id(db, user_id)
 
     if not candidate_profile:
         raise HTTPException(status_code=404, detail="Candidate profile not found")
 
     # Fetch all applications by this user
-    applications = db.execute(
-        select(JobApplication).where(JobApplication.candidate_id == candidate_profile.id)
-    ).scalars().all()
+    applications = job_application_repository.get_all_by_candidate(db, candidate_profile.id)
 
     return list(applications)
-
 
 
 # ----------------------------------------------------------
 # Get a Specific Application (by job_id and candidate_id)
 # ----------------------------------------------------------
-async def get_application_by_job_and_user(
+def get_application_by_job_and_user(
     db: Session,
+    user_id: int,
     job_id: int,
-    candidate_user_id: int,
-)->Optional[JobApplication]:
+) -> JobApplication:
+    """
+       Fetch a job application by job ID and candidate's user ID.
+       Raises:
+           HTTPException(404): If candidate profile or job application not found.
+       """
 
-    candidate_profile = db.execute(
-        select(CandidateProfile).where(CandidateProfile.user_id == candidate_user_id)
-    ).scalar_one_or_none()
+    candidate_profile = candidate_profile_repository.get_profile_by_id(db, user_id)
 
     if not candidate_profile:
         raise HTTPException(
@@ -107,8 +97,11 @@ async def get_application_by_job_and_user(
             detail="Candidate profile not found"
         )
 
-    application = job_application_repository.get_by_candidate_and_job(db, candidate_profile.id, job_id)
+    application = job_application_repository.get_by_candidate_and_job(db, job_id, candidate_profile.id)
 
     if not application:
-        raise HTTPException(status_code=404, detail="Job application not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Job application not found"
+        )
     return application

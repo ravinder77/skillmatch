@@ -30,14 +30,15 @@ def get_by_id(db: Session, job_id: int) -> Optional[Job]:
 
 def get_all(db: Session, skip: int = 0, limit: int = 10) -> List[Job]:
     """ Fetch all jobs with pagination """
-    query = select(Job).offset(skip).limit(limit)
+    query = select(Job).where(Job.is_active == True).offset(skip).limit(limit)
     return list(db.execute(query).scalars().all())
 
 
 
-def update(db: Session, db_job: Job, data: dict) -> Job:
+def update(db: Session, job_id: int, job_data: dict) -> Job:
     """Update a job in the database"""
-    for field, value in data.items():
+    db_job = get_by_id(db, job_id)
+    for field, value in job_data.items():
         setattr(db_job, field, value)
     try:
         db.add(db_job)
@@ -51,6 +52,7 @@ def update(db: Session, db_job: Job, data: dict) -> Job:
         db.rollback()
         raise HTTPException(status_code=500, detail="Internal Server Error while updating job")
 
+
 def delete(db: Session, job_id: int) -> bool:
     db_job = get_by_id(db, job_id)
     if not db_job:
@@ -60,5 +62,10 @@ def delete(db: Session, job_id: int) -> bool:
     return True
 
 
+def get_job_by_employer_id(db: Session, job_id: int, employer_id) -> Job:
+    db_job = db.execute(select(Job).where(
+        Job.employer_id == employer_id,
+        Job.id == job_id,
+    )).scalar_one_or_none()
 
-
+    return db_job

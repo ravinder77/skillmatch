@@ -1,11 +1,11 @@
 """
-Job and Job Application Routes
+Job Routes
 """
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
-from typing import Optional, Annotated
+from typing import Optional, Annotated, List
 from sqlalchemy.orm import Session
 from starlette import status
-from app.schemas.job import JobResponse, JobCreate
+from app.schemas.job import JobResponse, JobCreate, JobUpdate
 from app.models.user import User
 from ..dependencies import get_current_employer
 from app.db.session import get_db
@@ -16,6 +16,10 @@ from app.services import job_service
 
 router = APIRouter()
 
+
+# ----------------------------------------------------------
+# Create a Job (Recruiter/Admin only)
+# ----------------------------------------------------------
 @router.post("/", response_model=JobResponse, status_code=status.HTTP_201_CREATED)
 async def create_job(
         job_data: JobCreate,
@@ -31,10 +35,14 @@ async def create_job(
     job = job_service.create_job(db, job_data, current_employer.id)
     return JobResponse.model_validate(job)
 
+# ----------------------------------------------------------
+# Delete a Job (Recruiter/Admin only)
+# ----------------------------------------------------------
 @router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_job(
         job_id: int,
-        db: Annotated[Session, Depends(get_db)]
+        db: Annotated[Session, Depends(get_db)],
+        current_employer: Annotated[User, Depends(get_current_employer)],
 ):
 
     job = db.query(Job).filter(Job.id == job_id).first()
@@ -44,56 +52,52 @@ async def delete_job(
     db.delete(job)
     db.commit()
 
+# ----------------------------------------------------------
+# Get All Active Jobs (for candidates)
+# ----------------------------------------------------------
+@router.get(
+    "/",
+    response_model=List[JobResponse],
+    status_code=status.HTTP_200_OK
+)
+def get_all_active_jobs(
+        db: Annotated[Session, Depends(get_db)]
+) -> List[Job]:
+    """ Retrieve all active jobs """
+    jobs = get_all_active_jobs(db)
+    return jobs
 
-@router.get("/{job_id}/candidates", status_code=status.HTTP_200_OK)
-async def get_job_applications(
+
+# ----------------------------------------------------------
+# Get a Single Job by ID
+# ----------------------------------------------------------
+@router.get(
+    "/{job_id}",
+    response_model=JobResponse,
+    status_code=status.HTTP_200_OK
+)
+def get_job_by_id(
         job_id: int,
-        db: Annotated[Session, Depends(get_db)],
-        employer: Annotated[User, Depends(get_current_employer)],
+        db: Annotated[Session, Depends(get_db)]
 ):
-
-    if employer.role.value != "employer":
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authorized to perform this action"
-        )
-
-    job = db.query(Job).filter(Job.id == job_id).first()
-
-    if not job:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Job not found"
-        )
-
-    if employer.id != job.employer_id:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authorized to perform this action"
-        )
-
-    applications = (
-        db.query(JobApplication)
-        .filter(JobApplication.job_id == job.id)
-        .all()
-    )
-
-    return applications
+    """ Retrieve a specific job by its ID. """
 
 
 
+# ----------------------------------------------------------
+# Update a Job
+# ----------------------------------------------------------
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+@router.put(
+    "/{job_id}",
+    response_model=JobResponse,
+    status_code=status.HTTP_200_OK
+)
+def update_job(
+        job_id: int,
+        job_data: JobUpdate,
+        db: Annotated[Session, Depends(get_db)],
+        current_employer: Annotated[User, Depends(get_current_employer)],
+):
+    """ Update a specific job by its ID. """
+    job = job_service.update_job(db, job_id, job_data, current_employer.id)

@@ -3,14 +3,13 @@ from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 from app.models.job_application import JobApplication
 from sqlalchemy.orm import Session
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 
 # ----------------------------------------------------------
 # Create a New Job Application
 # ----------------------------------------------------------
-async def create(db: Session, application: JobApplication) -> JobApplication:
+def create(db: Session, application: JobApplication) -> JobApplication:
     """ Create a new job application """
     try:
         db.add(application)
@@ -24,18 +23,16 @@ async def create(db: Session, application: JobApplication) -> JobApplication:
         db.rollback()
         raise HTTPException(status_code=500, detail="Internal Server Error while updating job")
 
-
-
 # ----------------------------------------------------------
 # Get Job Application by Candidate & Job
 # ----------------------------------------------------------
-async def get_by_candidate_and_job(
+def get_by_candidate_and_job(
         db: Session,
-        candidate_id: int,
-        job_id: int
+        job_id: int,
+        candidate_profile_id: int,
 ) -> Optional[JobApplication]:
     stmt = select(JobApplication).where(
-        JobApplication.candidate_id == candidate_id,
+        JobApplication.candidate_id == candidate_profile_id,
         JobApplication.job_id == job_id
     )
     return db.execute(stmt).scalar_one_or_none()
@@ -44,12 +41,12 @@ async def get_by_candidate_and_job(
 # ----------------------------------------------------------
 # Get All Applications for a Candidate
 # ----------------------------------------------------------
-async def get_all_by_candidate(
+def get_all_by_candidate(
     db: Session,
-    candidate_id: int
+    candidate_profile_id: int
 ) -> List[JobApplication]:
 
-    result = db.execute(select(JobApplication).where(JobApplication.candidate_id == candidate_id))
+    result = db.execute(select(JobApplication).where(JobApplication.candidate_id == candidate_profile_id))
     return list(result.scalars().all())
 
 
