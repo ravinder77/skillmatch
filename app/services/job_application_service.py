@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -12,7 +12,7 @@ from app.core.config import settings
 from app.utils.upload_file import upload_file_to_s3
 
 
-def apply_to_job(
+async def apply_to_job(
         db: Session,
         candidate_user_id: int,
         job_id: int,
@@ -54,9 +54,7 @@ def apply_to_job(
                 detail=f"Resume upload failed: {str(e)}"
             )
 
-
     # Create Job Application object
-
     job_application = JobApplication(
         candidate_id=candidate_profile.id,
         job_id=job_id,
@@ -65,3 +63,52 @@ def apply_to_job(
 
     return job_application_repository.create(db, job_application)
 
+
+# ----------------------------------------------------------
+# Get All Applications by a Candidate
+# ----------------------------------------------------------
+async def get_all_applications_by_user(
+        db: Session,
+        candidate_user_id: int,
+) -> List[JobApplication]:
+
+    candidate_profile = db.execute(
+        select(CandidateProfile).where(CandidateProfile.user_id == candidate_user_id)
+    ).scalar_one_or_none()
+
+    if not candidate_profile:
+        raise HTTPException(status_code=404, detail="Candidate profile not found")
+
+    # Fetch all applications by this user
+    applications = db.execute(
+        select(JobApplication).where(JobApplication.candidate_id == candidate_profile.id)
+    ).scalars().all()
+
+    return list(applications)
+
+
+
+# ----------------------------------------------------------
+# Get a Specific Application (by job_id and candidate_id)
+# ----------------------------------------------------------
+async def get_application_by_job_and_user(
+    db: Session,
+    job_id: int,
+    candidate_user_id: int,
+)->Optional[JobApplication]:
+
+    candidate_profile = db.execute(
+        select(CandidateProfile).where(CandidateProfile.user_id == candidate_user_id)
+    ).scalar_one_or_none()
+
+    if not candidate_profile:
+        raise HTTPException(
+            status_code=404,
+            detail="Candidate profile not found"
+        )
+
+    application = job_application_repository.get_by_candidate_and_job(db, candidate_profile.id, job_id)
+
+    if not application:
+        raise HTTPException(status_code=404, detail="Job application not found")
+    return application

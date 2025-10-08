@@ -1,8 +1,11 @@
 from fastapi import HTTPException
-from jose import JWTError
-
+from jose import JWTError, jwt
+from sqlalchemy import select
+from starlette import status
+from app.core.config import settings
 from app.core.security import (
-    hash_password, create_access_token, create_refresh_token, verify_password, decode_token)
+    hash_password, create_access_token, create_refresh_token, verify_password, decode_token
+)
 from app.schemas.auth import AuthResponse
 from app.schemas.user import UserCreate
 from sqlalchemy.orm import Session
@@ -28,11 +31,10 @@ def signup_user(db: Session, body: UserCreate) -> tuple[AuthResponse, str]:
         is_active=True,
     )
 
-
     users_repository.create_user(db, new_user)
     access_token, refresh_token = generate_tokens(new_user)
 
-    auth_body =  AuthResponse(
+    auth_body = AuthResponse(
         id=new_user.id,
         email=new_user.email,
         username=new_user.username,
@@ -57,7 +59,7 @@ def login_user(db: Session, email: str, password: str) -> tuple[str, str]:
 def refresh_user_session(db: Session, refresh_token: str) -> tuple[str, str]:
     try:
         payload = decode_token(refresh_token)
-        user_id = payload.get("id")
+        user_id = payload.get("sub")
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid refresh token")
     except JWTError:
@@ -73,19 +75,38 @@ def refresh_user_session(db: Session, refresh_token: str) -> tuple[str, str]:
     return access_token, new_refresh_token
 
 
-def generate_tokens(user: User) -> tuple[ str, str]:
+def generate_tokens(user: User) -> tuple[str, str]:
     access_token = create_access_token({
-        "id": user.id,
+        "sub": user.id,
         "email": user.email,
         "role": user.role.value,
     })
     refresh_token = create_refresh_token({
-        "id": user.id,
+        "sub": user.id,
         "email": user.email,
         "role": user.role.value,
     })
     return access_token, refresh_token
 
 
+def get_user_from_token(db: Session, token: str) -> User:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials.",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=settings.ALGORITHM)
+        user_id: int = payload.get("sub")  # 'sub' stands for subject (user id)
+        if user_id is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
 
+    # Fetch user from DB
+    user = db.execute(select(User).where(User.id == user_id)).scalar_one_or_none()
+    if user is None:
+        raise credentials_exception
+
+    return user

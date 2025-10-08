@@ -1,8 +1,6 @@
 from typing import Optional
-
 from pydantic import BaseModel, HttpUrl, ConfigDict
 from datetime import datetime
-
 from app.core.enums import ApplicationStatus
 
 
@@ -24,18 +22,11 @@ class JobApplicationResponse(BaseModel):
     resume_url: str
     applied_at: datetime
 
-class CandidateApplication(BaseModel):
-    id: int
-    status: ApplicationStatus
-    resume_url: HttpUrl
-    applied_at: datetime
-    candidate_profile_url: HttpUrl
-
     model_config = ConfigDict(
-        from_attributes=True,
+        from_attributes= True,
         validate_by_name=True,
         validate_by_alias=True,
         use_enum_values=True,
-
     )
+
 

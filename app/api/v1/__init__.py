@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from typing import List
-from app.api.v1 import auth, projects, skills, users, portfolio, job_router, candidate_profile, employer
+from app.api.v1 import auth, projects, skill_route, users_route, portfolio, job_routes, candidate_profile, employer
 
 api_router = APIRouter()
 
