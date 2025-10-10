@@ -1,11 +1,12 @@
 from datetime import datetime, timedelta
-from typing import Optional, List
+from typing import TYPE_CHECKING, Optional, List
 from sqlalchemy import Integer, String, ForeignKey, Text, JSON, DateTime, func, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 from app.db.mixins import TimestampMixin
-from app.models.job_application import JobApplication
 
+if TYPE_CHECKING:
+    from app.models import JobApplication, User
 
 class Job(Base, TimestampMixin):
     __tablename__ = "jobs"
@@ -27,11 +28,10 @@ class Job(Base, TimestampMixin):
         default=lambda:datetime.now() + timedelta(days=30),
         nullable=True
     )
-
-    #
     employer_id:Mapped[int]= mapped_column(ForeignKey("users.id"), nullable=False)
 
     # Relationships
-    applications:Mapped[List["JobApplication"]] = relationship("JobApplication", back_populates="job")
+    employer: Mapped["User"] = relationship("User", back_populates="jobs")
+    applications:Mapped[List["JobApplication"]] = relationship("JobApplication", back_populates="job", cascade="all, delete-orphan")
 
 

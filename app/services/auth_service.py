@@ -11,13 +11,13 @@ from app.schemas.user import UserCreate
 from sqlalchemy.orm import Session
 from app.models.user import User
 from app.core.enums import UserRole
-from app.repositories import users_repository
+from app.repositories import user_repository
 
 
 def signup_user(db: Session, body: UserCreate) -> tuple[AuthResponse, str]:
-    if users_repository.get_by_username(db, body.username):
+    if user_repository.get_by_username(db, body.username):
         raise HTTPException(status_code=400, detail="Username already exists")
-    if users_repository.get_by_email(db, str(body.email)):
+    if user_repository.get_by_email(db, str(body.email)):
         raise HTTPException(status_code=400, detail="Email already exists")
 
     # build sqlalchemy model
@@ -31,7 +31,7 @@ def signup_user(db: Session, body: UserCreate) -> tuple[AuthResponse, str]:
         is_active=True,
     )
 
-    users_repository.create_user(db, new_user)
+    user_repository.create_user(db, new_user)
     access_token, refresh_token = generate_tokens(new_user)
 
     auth_body = AuthResponse(
@@ -48,7 +48,7 @@ def signup_user(db: Session, body: UserCreate) -> tuple[AuthResponse, str]:
 
 
 def login_user(db: Session, email: str, password: str) -> tuple[str, str]:
-    user = users_repository.get_by_email(db, email)
+    user = user_repository.get_by_email(db, email)
     if not user or not verify_password(password, str(user.hashed_password)):
         raise HTTPException(status_code=400, detail="Incorrect email or password")
 
@@ -65,7 +65,7 @@ def refresh_user_session(db: Session, refresh_token: str) -> tuple[str, str]:
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
-    user = users_repository.get_by_id(db, user_id)
+    user = user_repository.get_by_id(db, user_id)
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

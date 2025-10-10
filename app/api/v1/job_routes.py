@@ -10,7 +10,7 @@ from app.models.user import User
 from ..dependencies import get_current_employer
 from app.db.session import get_db
 from ...models.job import Job
-from ...models.job_application import JobApplication
+from ...models.application import JobApplication
 from app.services import job_service
 
 
@@ -44,13 +44,8 @@ async def delete_job(
         db: Annotated[Session, Depends(get_db)],
         current_employer: Annotated[User, Depends(get_current_employer)],
 ):
+    job_service.delete_job(db, job_id, current_employer.id)
 
-    job = db.query(Job).filter(Job.id == job_id).first()
-    if not job:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
-
-    db.delete(job)
-    db.commit()
 
 # ----------------------------------------------------------
 # Get All Active Jobs (for candidates)
@@ -81,13 +76,14 @@ def get_job_by_id(
         db: Annotated[Session, Depends(get_db)]
 ):
     """ Retrieve a specific job by its ID. """
-
-
+    job = job_service.get_job_by_id(db, job_id)
+    if not job:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
+    return JobResponse.model_validate(job)
 
 # ----------------------------------------------------------
 # Update a Job
 # ----------------------------------------------------------
-
 @router.put(
     "/{job_id}",
     response_model=JobResponse,

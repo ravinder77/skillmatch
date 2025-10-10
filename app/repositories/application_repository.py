@@ -1,7 +1,7 @@
 from typing import Optional, List
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
-from app.models.job_application import JobApplication
+from app.models.application import JobApplication
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 
@@ -29,10 +29,10 @@ def create(db: Session, application: JobApplication) -> JobApplication:
 def get_by_candidate_and_job(
         db: Session,
         job_id: int,
-        candidate_profile_id: int,
+        candidate_id: int,
 ) -> Optional[JobApplication]:
     stmt = select(JobApplication).where(
-        JobApplication.candidate_id == candidate_profile_id,
+        JobApplication.candidate_id == candidate_id,
         JobApplication.job_id == job_id
     )
     return db.execute(stmt).scalar_one_or_none()
@@ -43,12 +43,11 @@ def get_by_candidate_and_job(
 # ----------------------------------------------------------
 def get_all_by_candidate(
     db: Session,
-    candidate_profile_id: int
+    candidate_id: int
 ) -> List[JobApplication]:
-
-    result = db.execute(select(JobApplication).where(JobApplication.candidate_id == candidate_profile_id))
+    """ Returns all job applications submitted by a given user. """
+    result = db.execute(select(JobApplication).where(JobApplication.candidate_id == candidate_id))
     return list(result.scalars().all())
-
 
 # ----------------------------------------------------------
 # Get All Applications for a Specific Job

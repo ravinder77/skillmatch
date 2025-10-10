@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     OPENAI_API_KEY: str
 
+    AWS_S3_BUCKET: str | None = None
+    AWS_DEFAULT_REGION: str | None = None
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 
@@ -35,7 +38,6 @@ class TestingSettings(Settings):
 class ProductionSettings(Settings):
     ENVIRONMENT: str = "production"
     DEBUG: bool = False
-
 
 
 # --- Factory for choosing the right settings ---

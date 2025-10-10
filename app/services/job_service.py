@@ -29,21 +29,25 @@ def get_all_active_jobs(db: Session) -> List[Job]:
 
 
 def get_job_by_id(db: Session, job_id: int) -> Job:
+    """ Retrieve a job by its ID or raise 404 if not found. """
     job = job_repository.get_by_id(db, job_id)
 
     if not job:
         raise HTTPException(status_code=404, detail="Job not found.")
     return job
 
-def delete_job(db: Session, job_id: int) -> None:
-    job = job_repository.get_by_id(db, job_id)
-    if not job:
+def delete_job(db: Session, job_id: int, employer_id) -> None:
+    """ Delete a job if the employer owns it. """
+    job = job_repository.get_job_by_employer_id(db, job_id, employer_id)
+
+    if not job or job.employer_id != employer_id:
         raise HTTPException(status_code=404, detail="Job not found.")
     job_repository.delete(db, job_id)
     return None
 
 
 def update_job(db: Session, job_id: int, job_data, employer_id: int) -> Job:
+
     job = job_repository.get_job_by_employer_id(db, job_id, employer_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found.")

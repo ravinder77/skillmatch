@@ -10,7 +10,7 @@ from app.services import auth_service
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
-async def get_current_user(
+def get_current_user(
         token: Annotated[str, Depends(oauth2_scheme)],
         db: Annotated[Session, Depends(get_db)]) -> User:
     """

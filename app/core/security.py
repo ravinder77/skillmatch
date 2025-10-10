@@ -1,10 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Optional
-
 from fastapi import HTTPException
 from jose import JWTError, jwt
 from passlib.hash import bcrypt
-
 from app.core.config import settings
 
 

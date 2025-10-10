@@ -5,7 +5,7 @@ from app.api.dependencies import get_current_user
 from app.schemas.job_application import JobApplicationResponse
 from app.db.session import get_db
 from app.models.user import User
-from app.services import job_application_service
+from app.services import application_service
 
 router = APIRouter()
 
@@ -25,9 +25,9 @@ async def apply_job(
     if current_user.role.value != "candidate":
         raise HTTPException(status_code=401, detail="Not authorized to perform this action")
 
-    application = job_application_service.apply_to_job(
+    application = application_service.apply_to_job(
         db=db,
-        user_id=current_user.id,
+        candidate_id=current_user.id,
         job_id=job_id,
         resume_file=resume
     )
@@ -56,7 +56,7 @@ async def list_jobs(
             detail="Not authorized to perform this action"
         )
 
-    applications = job_application_service.get_all_applications_by_user(db, current_user.id)
+    applications = application_service.get_all_applications_by_candidate(db, current_user.id)
 
     return applications
 
@@ -82,5 +82,5 @@ async def get_application_by_job(
             detail="Not authorized to perform this action"
         )
 
-    application = job_application_service.get_application_by_job_and_user(db, job_id, current_user.id)
+    application = application_service.get_application_by_job_and_candidate(db, job_id, current_user.id)
     return JobApplicationResponse.model_validate(application)

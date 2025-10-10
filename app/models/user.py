@@ -1,13 +1,14 @@
 from sqlalchemy import Boolean, Column, DateTime, Enum, Integer, String, func, text
-from typing import Optional, List
-from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
+from typing import TYPE_CHECKING, Optional, List
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.enums import UserRole
 from app.db.base import Base
 from app.db.mixins import TimestampMixin, SoftDeleteMixin
-from app.models.candidate_profile import CandidateProfile
-from app.models.project import Project
-from app.models.user_skill import UserSkill
 
+
+if TYPE_CHECKING:
+    from app.models.job import Job
+    from app.models.application import JobApplication
 
 # User Model
 class User(Base, TimestampMixin, SoftDeleteMixin):
@@ -27,21 +28,14 @@ class User(Base, TimestampMixin, SoftDeleteMixin):
     hashed_password:Mapped[str] = mapped_column(String(255), nullable=False)
 
     is_active:Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-
-    # relationships
-    # one-to-many relation with skills, a user can have many skills
-    skills:Mapped[List["UserSkill"]] = relationship(
-        "UserSkill", back_populates="user", cascade="all, delete-orphan"
+    # Employer → Jobs
+    jobs: Mapped[List["Job"]] = relationship(
+        "Job",
+        back_populates="employer",
+        cascade="all, delete-orphan"
     )
 
-    # one-to-many relation with projects, a user can have many projects
-    projects:Mapped[List["Project"]] = relationship(
-        "Project", back_populates="user", cascade="all, delete-orphan"
-    )
-
-    profile:Mapped[Optional["CandidateProfile"]] = relationship(
-        "CandidateProfile", back_populates="user", uselist=False, cascade="all, delete-orphan"
-    )
+    applications:Mapped[List["JobApplication"]] = relationship("JobApplication", back_populates="candidate")
 
     @property
     def full_name(self):
