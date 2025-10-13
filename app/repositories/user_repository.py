@@ -1,32 +1,38 @@
 from sqlalchemy import select
-from fastapi import Depends, HTTPException
+from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.user import User
 
-def create_user(db: Session, user: User) -> User:
+
+async def create_user(db: AsyncSession, user: User) -> User:
     try:
         db.add(user)
-        db.commit()
-        db.refresh(user)
+        await db.commit()
+        await db.refresh(user)
         return user
     except IntegrityError:
+        await db.rollback()
         raise HTTPException(status_code=400, detail="User not found")
     except Exception:
-        db.rollback()
+        await db.rollback()
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 
-def get_by_id(db: Session, user_id: int) -> User | None:
+
+async def get_by_id(db: AsyncSession, user_id: int) -> User | None:
     stmt = select(User).where(User.id == user_id)
-    return db.execute(stmt).scalars().first()
+    result = await db.execute(stmt)
+    return result.scalar_one_or_none()
 
-def get_by_email(db: Session, email: str) -> User | None:
+async def get_by_email(db: AsyncSession, email: str) -> User | None:
     stmt = select(User).where(User.email == email)
-    return db.execute(stmt).scalars().first()
+    result = await db.execute(stmt)
+    return result.scalar_one_or_none()
 
-def get_by_username(db: Session, username: str) -> User | None:
+async def get_by_username(db: AsyncSession, username: str) -> User | None:
     stmt = select(User).where(User.username == username)
-    return db.scalar(stmt)
+    result = await db.execute(stmt)
+    return result.scalar_one_or_none()
 

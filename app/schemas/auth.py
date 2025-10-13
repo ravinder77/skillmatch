@@ -19,19 +19,10 @@ class Token(BaseModel):
         validate_by_alias=True,
     )
 
+class LoginRequest(BaseModel):
+    email: str
+    password: str
 
-class TokenData(BaseModel):
-    id: Optional[int] = None
-    email: Optional[EmailStr] = None
-    role: Optional[UserRole] = None
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        extra="forbid",
-        validate_by_name=True,
-        validate_by_alias=True,
-        use_enum_values=True,
-    )
 
 
 class AuthResponse(BaseModel):
@@ -52,14 +43,3 @@ class AuthResponse(BaseModel):
     )
 
 
-class TokenResponse(BaseModel):
-    access_token: str
-    refresh_token: str
-    token_type: str
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        extra="forbid",
-        validate_by_name=True,
-        validate_by_alias=True,
-    )

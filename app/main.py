@@ -6,24 +6,28 @@ and generating AI-powered portfolio suggestions.
 
 import time
 import uvicorn
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from sqlalchemy import text
 
 from app.api.v1 import api_router
 from app.core.config import settings
 from app.core.middleware import register_middlewares
 from app.core.lifespan import lifespan
-from app.db.session import engine
 from dotenv import load_dotenv
+from app.core.logging_config import setup_logging
 
+#load env variables
 load_dotenv()
 
-app = FastAPI(lifespan=lifespan)
+#setup logging
+setup_logging()
+
+app = FastAPI(title='Skillmatch', lifespan=lifespan)
+
 
 # Register Middleware
 register_middlewares(app)
-
 
 #Routers
 app.include_router(api_router, prefix=settings.API_V1_STR)
@@ -62,14 +66,7 @@ async def root():
         "api_prefix": settings.API_V1_STR,
     }
 
-@app.get("/db-check")
-def db_check():
-    try:
-      with engine.connect() as conn:
-         result = conn.execute(text("SELECT 1"))
-         print("SQLite connected successfully:", result.fetchone())
-    except Exception as e:(
-        print("SQLite connection failed:", e))
+
 
 
 @app.get("/health")

@@ -14,10 +14,10 @@ class Settings(BaseSettings):
     ALLOWED_HOSTS: List[str] = ["*"]
     ENVIRONMENT: str = "development"
     ALGORITHM: str = "HS256"
+    DATABASE_URL: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     SECRET_KEY: str
-    DATABASE_URL: str
     OPENAI_API_KEY: str
 
     AWS_S3_BUCKET: str | None = None

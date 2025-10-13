@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 from fastapi import HTTPException
 from jose import JWTError, jwt
-from passlib.hash import bcrypt
+from passlib.hash import argon2
 from app.core.config import settings
 
 
@@ -13,7 +13,7 @@ def hash_password(password: str) -> str:
     :param password: takes a plain text password and hashes it
     :return: returns the hashed password string
     """
-    return bcrypt.hash(password)
+    return argon2.hash(password)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -23,7 +23,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     :param hashed_password: takes a hashed text password
     :return: verify the hashed password against the plain text and return True or False
     """
-    return bcrypt.verify(plain_password, hashed_password)
+    return argon2.verify(plain_password, hashed_password)
 
 
 # TOKENS UTILITIES

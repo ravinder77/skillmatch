@@ -19,7 +19,6 @@ class User(Base, TimestampMixin, SoftDeleteMixin):
     first_name:Mapped[str] = mapped_column(String(50), nullable=False)
     last_name:Mapped[str] = mapped_column(String(50), nullable=False)
     email:Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
-
     role:Mapped[UserRole] = mapped_column(
         Enum(UserRole, values_callable=lambda x:[e.value for e in x], native_enum=False),
         default=UserRole.CANDIDATE,
@@ -28,14 +27,21 @@ class User(Base, TimestampMixin, SoftDeleteMixin):
     hashed_password:Mapped[str] = mapped_column(String(255), nullable=False)
 
     is_active:Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
     # Employer → Jobs
     jobs: Mapped[List["Job"]] = relationship(
         "Job",
         back_populates="employer",
-        cascade="all, delete-orphan"
+        cascade="all, delete-orphan",
+        lazy="selectin"
     )
 
-    applications:Mapped[List["JobApplication"]] = relationship("JobApplication", back_populates="candidate")
+    applications:Mapped[List["JobApplication"]] = relationship(
+        "JobApplication",
+        back_populates="candidate",
+        cascade="all, delete-orphan",
+        lazy="selectin"
+    )
 
     @property
     def full_name(self):

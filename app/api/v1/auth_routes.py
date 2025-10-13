@@ -1,17 +1,14 @@
 from typing import Optional, Annotated
+from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
 from app.db.session import get_db
-from app.schemas.auth import AuthResponse, Token
+from app.schemas.auth import AuthResponse, Token, LoginRequest
 from app.schemas.user import UserCreate
 from app.services import auth_service as auth_service
 
 router = APIRouter()
-
-# OAUTH2 Password Flow
-oauth2_scheme = OAuth2PasswordBearer("auth/login")
 
 
 @router.post(
@@ -20,10 +17,10 @@ oauth2_scheme = OAuth2PasswordBearer("auth/login")
 async def signup(
         body: UserCreate,
         response: Response,
-        db: Annotated[Session, Depends(get_db)]):
+        db: Annotated[AsyncSession, Depends(get_db)]):
     """ Signup endpoint for users. """
 
-    auth_response, refresh_token = auth_service.signup_user(db, body)
+    auth_response, refresh_token = await auth_service.signup_user(db, body)
 
     response.set_cookie(
         key="refresh_token",
@@ -37,14 +34,18 @@ async def signup(
     return auth_response
 
 
-@router.post("/login", response_model=Token, status_code=status.HTTP_200_OK)
-async def login(form_data: OAuth2PasswordRequestForm = Depends(),
-        db: Session= Depends(get_db)):
+@router.post("/login", response_model=Token)
+async def login(
+        login_data: LoginRequest,
+        db: AsyncSession=Depends(get_db)):
     """ Login endpoint using OAuth2 password flow """
-    access_token, refresh_token = auth_service.login_user(db, form_data.username, form_data.password)
+    access_token, refresh_token = await auth_service.login_user(db, login_data.email, login_data.password)
 
     response = JSONResponse(
-        content={"access_token": access_token, "token_type": "bearer"}
+        content={
+            "access_token": access_token,
+            "token_type": "bearer",
+        }
     )
     response.set_cookie(
         key="refresh_token",
@@ -60,13 +61,13 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(),
 @router.post("/refresh", response_model=Token, status_code=status.HTTP_200_OK)
 async def refresh(
     refresh_token: Optional[str] = Cookie(None),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """ Refresh access token using http-only refresh token cookies """
     if not refresh_token:
         raise HTTPException(status_code=401, detail="Refresh token required")
 
-    access_token, refresh_token = auth_service.refresh_user_session(db, refresh_token)
+    access_token, refresh_token = await auth_service.refresh_user_session(db, refresh_token)
 
     response = JSONResponse(
         content={"access_token": access_token, "token_type": "bearer"}
