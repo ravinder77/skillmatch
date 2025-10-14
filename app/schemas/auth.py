@@ -23,7 +23,19 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
+    model_config = ConfigDict(
+        from_attributes=True,
+        extra="forbid",
+    )
 
+class Tokens(BaseModel):
+    access_token: str
+    refresh_token: str
+
+    model_config = ConfigDict(
+        from_attributes=True,
+        extra="forbid",
+    )
 
 class AuthResponse(BaseModel):
     id: int

@@ -71,7 +71,7 @@ async def login_user(db: AsyncSession, email: str, password: str) -> tuple[str, 
     return access_token, refresh_token
 
 
-async def refresh_user_session(db: AsyncSession, refresh_token: str) -> tuple[str, str]:
+async def refresh_tokens(db: AsyncSession, refresh_token: str) -> tuple[str, str]:
     try:
         payload = decode_token(refresh_token)
         user_id = payload.get("sub")

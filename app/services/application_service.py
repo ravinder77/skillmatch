@@ -1,5 +1,6 @@
 from typing import Optional, List
 from fastapi import HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 from starlette import status
 
@@ -8,8 +9,8 @@ from app.repositories import application_repository, job_repository
 from app.core.config import settings
 from app.utils.upload_file import upload_file_to_s3
 
-def apply_to_job(
-        db: Session,
+async def apply_to_job(
+        db: AsyncSession,
         candidate_id: int,
         job_id: int,
         resume_file: Optional = None
@@ -20,7 +21,7 @@ def apply_to_job(
       """
 
     # Fetch Job
-    job = job_repository.get_by_id(db, job_id)
+    job = await job_repository.get_by_id(db, job_id)
 
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -28,7 +29,7 @@ def apply_to_job(
         raise HTTPException(status_code=400, detail="Not accepting application currently")
 
     # Check if already applied for the job
-    existing_application = application_repository.get_by_candidate_and_job(db, job_id, candidate_id)
+    existing_application = await application_repository.get_by_candidate_and_job(db, job_id, candidate_id)
     if existing_application:
         raise HTTPException(status_code=400, detail="You have already applied for this job")
 
@@ -52,20 +53,20 @@ def apply_to_job(
         resume_url=resume_url,
     )
 
-    return application_repository.create(db, job_application)
+    return await application_repository.create(db, job_application)
 
 
 # ----------------------------------------------------------
 # Get All Applications by a Candidate
 # ----------------------------------------------------------
-def get_all_applications_by_candidate(
-        db: Session,
+async def get_all_applications_by_candidate(
+        db: AsyncSession,
         candidate_id: int,
 ) -> List[JobApplication]:
 
 
     # Fetch all applications by this user
-    applications = application_repository.get_all_by_candidate(db, candidate_id)
+    applications = await application_repository.get_all_by_candidate(db, candidate_id)
 
     return list(applications)
 
@@ -73,8 +74,8 @@ def get_all_applications_by_candidate(
 # ----------------------------------------------------------
 # Get a Specific Application (by job_id and candidate_id)
 # ----------------------------------------------------------
-def get_application_by_job_and_candidate(
-    db: Session,
+async def get_application_by_job_and_candidate(
+    db: AsyncSession,
     candidate_id: int,
     job_id: int,
 ) -> JobApplication:
@@ -84,7 +85,7 @@ def get_application_by_job_and_candidate(
            HTTPException(404): If candidate profile or job application not found.
        """
 
-    application = application_repository.get_by_candidate_and_job(db, job_id, candidate_id)
+    application = await application_repository.get_by_candidate_and_job(db, job_id, candidate_id)
 
     if not application:
         raise HTTPException(
