@@ -1,13 +1,10 @@
 import pytest
-import os
 from sqlalchemy import create_engine, StaticPool
 from sqlalchemy.orm import  sessionmaker
 from app.db.base import Base
 from fastapi.testclient import TestClient
 from app.core.enums import UserRole
-from app.main import app
-from app.db.session import get_db
-from app.api.dependencies import get_current_user
+from main import app
 
 TEST_DATABASE_URL = "sqlite:///./testdb.db"
 

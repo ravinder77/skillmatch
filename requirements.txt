@@ -21,3 +21,4 @@ jinja2
 sqlalchemy[asyncio]
 greenlet
 passlib[argon2]
+redis

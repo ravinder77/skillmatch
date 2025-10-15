@@ -1,6 +1,6 @@
 from starlette import status
 from app.core.enums import UserRole
-from app.main import app
+from main import app
 from app.db.session import get_db
 from app.api.dependencies import get_current_user
 from test.conftest import override_get_db, override_current_user

@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated, Optional, List
 from app.api.dependencies import get_current_user
 from app.core.enums import UserRole
-from app.schemas.job_application import JobApplicationResponse
+from app.schemas.application import JobApplicationResponse
 from app.db.session import get_db
 from app.models.user import User
 from app.services import application_service

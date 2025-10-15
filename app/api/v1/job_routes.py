@@ -1,17 +1,15 @@
 """
 Job Routes
 """
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated, List
-from sqlalchemy.orm import Session
 from starlette import status
 from app.schemas.job import JobResponse, JobCreate, JobUpdate
 from app.models.user import User
 from ..dependencies import get_current_employer
 from app.db.session import get_db
 from ...core.enums import UserRole
-from ...models.job import Job
 from app.services import job_service
 
 

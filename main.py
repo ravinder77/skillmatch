@@ -66,9 +66,6 @@ async def root():
         "api_prefix": settings.API_V1_STR,
     }
 
-
-
-
 @app.get("/health")
 async def health_check():
     """
@@ -82,4 +79,4 @@ async def health_check():
 
 
 if __name__ == "__main__":
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
