@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
 from typing import Optional
 from fastapi import HTTPException
-from jose import JWTError, jwt
+from jose import JWTError, jwt, ExpiredSignatureError
 from passlib.hash import argon2
 from app.core.config import settings
+from app.core.enums import UserRole
 
 
 # Password Utilities
@@ -27,39 +28,57 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 # TOKENS UTILITIES
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+def create_access_token(data: dict) -> str:
     """
     Generate an access token using a JWT token.
     """
     to_encode = data.copy()
-    expire = datetime.now() + (
-        expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    )
+    now = datetime.now()
+    expire = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRY)
     to_encode.update({"exp": expire})
-    token = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
-    return token
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return encoded_jwt
 
 
 # Create Refresh Token
-def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+def create_refresh_token(data: dict) -> str:
     """
     Generate an refresh token using a JWT token.
     """
     to_encode = data.copy()
-    expire = datetime.now() + (
-        expires_delta or timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
-    )
+    now = datetime.now()
+    expire = now + timedelta (minutes=settings.REFRESH_TOKEN_EXPIRY)
+
     to_encode.update({"exp": expire})
-    token = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
-    return token
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return encoded_jwt
+
+
+def generate_tokens(user_id: int, role: UserRole) -> tuple[str, str]:
+    """
+    Generates a new access token and refresh token
+    """
+    payload = {
+        "sub": str(user_id),
+        "role": role.value,
+        "iat": datetime.now(),
+    }
+    access_token = create_access_token(payload)
+    refresh_token = create_refresh_token(payload)
+
+    return access_token, refresh_token
 
 
 def decode_token(token: str) -> Optional[dict]:
     try:
         payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+            token,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM]
         )
         return payload
-
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Expired token")
     except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
+        raise HTTPException(status_code=401, detail="Invalid token")
+

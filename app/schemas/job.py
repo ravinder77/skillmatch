@@ -54,3 +54,11 @@ class JobResponse(BaseModel):
         validate_by_name=True,
         validate_by_alias=True,
     )
+
+class JobListResponse(BaseModel):
+        source: str
+        data: List[JobResponse]
+
+class JobDetailsResponse(BaseModel):
+    source: str
+    data: JobResponse

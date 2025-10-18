@@ -26,6 +26,7 @@ setup_logging()
 app = FastAPI(title='Skillmatch', lifespan=lifespan)
 
 
+
 # Register Middleware
 register_middlewares(app)
 

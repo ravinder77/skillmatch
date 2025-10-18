@@ -34,4 +34,7 @@ class Job(Base, TimestampMixin):
     employer: Mapped["User"] = relationship("User", back_populates="jobs")
     applications:Mapped[List["JobApplication"]] = relationship("JobApplication", back_populates="job", cascade="all, delete-orphan")
 
+    def to_dict(self):
+        pass
+
 

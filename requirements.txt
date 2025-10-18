@@ -1,3 +1,4 @@
+booktype
 fastapi
 asyncpg
 SQLAlchemy>=2.0.43
@@ -21,4 +22,4 @@ jinja2
 sqlalchemy[asyncio]
 greenlet
 passlib[argon2]
-redis
+redis>=6.4.0

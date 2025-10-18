@@ -1,20 +1,23 @@
 """
 Job Routes
 """
+import json
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated, List
 from starlette import status
-from app.schemas.job import JobResponse, JobCreate, JobUpdate
+from app.schemas.job import JobResponse, JobCreate, JobUpdate, JobListResponse, JobDetailsResponse
 from app.models.user import User
-from ..dependencies import get_current_employer
+from app.dependencies.auth import get_current_employer
 from app.db.session import get_db
 from ...core.enums import UserRole
 from app.services import job_service
+from app.dependencies.redis import get_redis
+from redis.asyncio import Redis
 
+from ...services.cache_service import RedisCacheService
 
 router = APIRouter()
-
 
 # ----------------------------------------------------------
 # Create a Job (Recruiter/Admin only)
@@ -55,15 +58,29 @@ async def delete_job(
 # ----------------------------------------------------------
 @router.get(
     "/",
-    response_model=List[JobResponse],
+    response_model=JobListResponse,
     status_code=status.HTTP_200_OK
 )
 async def get_all_active_jobs(
-        db: Annotated[AsyncSession, Depends(get_db)]
-) -> List[JobResponse]:
+        db: Annotated[AsyncSession, Depends(get_db)],
+        redis: Annotated[Redis, Depends(get_redis)]
+):
     """ Retrieve all active jobs """
+    cache_key = "jobs:list"
+
+    # Try to get from redis
+    if cached_data := await redis.get(cache_key):
+        return {
+            "source": "cache",
+            "data": json.loads(cached_data),
+        }
+
     jobs = await job_service.get_all_active_jobs(db)
-    return [JobResponse.model_validate(job) for job in jobs]
+    jobs_list = [JobResponse.model_validate(job).model_dump() for job in jobs]
+
+    # store in cache
+    await redis.set(cache_key, json.dumps(jobs_list), ex=300)
+    return { "source": "db", "data": jobs_list }
 
 
 # ----------------------------------------------------------
@@ -71,17 +88,32 @@ async def get_all_active_jobs(
 # ----------------------------------------------------------
 @router.get(
     "/{job_id}",
-    response_model=JobResponse,
-    status_code=status.HTTP_200_OK
+    response_model=JobDetailsResponse,
+    status_code=status.HTTP_200_OK,
 )
 async def get_job_by_id(
         job_id: int,
-        db: Annotated[AsyncSession, Depends(get_db)]
+        db: Annotated[AsyncSession, Depends(get_db)],
+        redis: Annotated[Redis, Depends(get_redis)]
 ):
     """ Retrieve a specific job by its ID. """
-    job = await job_service.get_job_by_id(db, job_id)
+    cache_key = f"jobs:{job_id}"
 
-    return JobResponse.model_validate(job)
+    if cached_job := await redis.get(cache_key):
+        return {
+            "source": "cache",
+            "data": json.loads(cached_job),
+        }
+
+    job = await job_service.get_job_by_id(db, job_id)
+    job_schema = JobResponse.model_validate(job).model_dump()
+    # set cache
+    await redis.set(cache_key, json.dumps(job_schema), ex=300)
+
+    return {
+        "source": "db",
+        "data": job_schema,
+    }
 
 # ----------------------------------------------------------
 # Update a Job

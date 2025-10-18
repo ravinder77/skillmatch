@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status, HTTPException, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated, Optional, List
-from app.api.dependencies import get_current_user
+from app.dependencies.auth import get_current_user
 from app.core.enums import UserRole
 from app.schemas.application import JobApplicationResponse
 from app.db.session import get_db

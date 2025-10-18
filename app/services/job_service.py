@@ -4,7 +4,8 @@ from fastapi import HTTPException
 from starlette import status
 from app.models.job import Job
 from app.repositories import job_repository
-from app.schemas.job import JobCreate
+from app.schemas.job import JobCreate, JobResponse
+
 
 async def create_job(
         db: AsyncSession,

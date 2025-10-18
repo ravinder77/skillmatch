@@ -3,8 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated
 from starlette import status
 from app.schemas.user import UserUpdate, UserResponse
-from app.api.dependencies import get_current_user
-from app.services import auth_service
+from app.dependencies.auth import get_current_user
 from app.models import User
 from app.db.session import get_db
 

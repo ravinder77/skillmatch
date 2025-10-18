@@ -4,7 +4,7 @@ from jose import JWTError, jwt
 from starlette import status
 from app.core.config import settings
 from app.core.security import (
-    hash_password, create_access_token, create_refresh_token, verify_password, decode_token
+    hash_password, verify_password, decode_token, generate_tokens
 )
 from app.schemas.auth import AuthResponse
 from app.schemas.user import UserCreate
@@ -28,14 +28,15 @@ async def signup_user(db: AsyncSession, body: UserCreate) -> tuple[AuthResponse,
         last_name=body.last_name,
         email=str(body.email),
         hashed_password=hash_password(body.password),
-        role=UserRole.CANDIDATE,
+        role=body.role,
         is_active=True,
     )
 
     # save user
-    await user_repository.create_user(db, new_user)
+    user = await user_repository.create_user(db, new_user)
+
     # generate tokens
-    access_token, refresh_token = generate_tokens(new_user)
+    access_token, refresh_token = generate_tokens(user.id, user.role)
 
     # build response
     auth_body = AuthResponse(
@@ -67,14 +68,17 @@ async def login_user(db: AsyncSession, email: str, password: str) -> tuple[str, 
             detail="Invalid Credentials"
         )
 
-    access_token, refresh_token = generate_tokens(user.id, user.email, user.role)
+    access_token, refresh_token = generate_tokens(user.id, user.role)
     return access_token, refresh_token
 
 
-async def refresh_tokens(db: AsyncSession, refresh_token: str) -> tuple[str, str]:
+async def refresh_tokens(
+        db: AsyncSession,
+        refresh_token: str) -> tuple[str, str]:
+    """Refresh tokens for a user"""
     try:
         payload = decode_token(refresh_token)
-        user_id = payload.get("sub")
+        user_id = int(payload["sub"])
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid refresh token")
     except JWTError:
@@ -88,29 +92,17 @@ async def refresh_tokens(db: AsyncSession, refresh_token: str) -> tuple[str, str
             detail="User not found"
         )
 
-    access_token, new_refresh_token = generate_tokens(user.id, user.email, user.role)
+    access_token, new_refresh_token = generate_tokens(user.id, user.role)
 
     return access_token, new_refresh_token
 
-def generate_tokens(user_id: int, email: str, role: UserRole) -> tuple[str, str]:
-    """
-    Generates a new access token and refresh token
-    """
-    access_token = create_access_token({
-        "sub": user_id,
-        "email": email,
-        "role": role.value,
-    })
-    refresh_token = create_refresh_token({
-        "sub": id,
-        "email": email,
-        "role": role.value,
-    })
-    return access_token, refresh_token
 
 
 async def get_user_from_token(db: AsyncSession, token: str) -> User:
-
+    """
+       Decode the given JWT token and return the associated user object.
+       Raises HTTP 401 if the token is invalid or the user does not exist.
+       """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials.",
@@ -118,8 +110,8 @@ async def get_user_from_token(db: AsyncSession, token: str) -> User:
     )
 
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=settings.ALGORITHM)
-        user_id: int = payload.get("sub")  # 'sub' stands for subject (user id)
+        payload = decode_token(token)
+        user_id = int(payload["sub"]) # 'sub' stands for subject (user id)
         if user_id is None:
             raise credentials_exception
     except JWTError:
