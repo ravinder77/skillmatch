@@ -63,6 +63,3 @@ def user_payload():
         "role": UserRole.CANDIDATE.value,
     }
 
-# app.dependency_overrides[get_db] = override_get_db
-# app.dependency_overrides[get_current_user] = override_current_user
-
