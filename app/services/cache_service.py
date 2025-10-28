@@ -1,6 +1,6 @@
 import json
 from redis.asyncio import Redis
-from app.core.config import settings
+from app.config.settings import settings
 
 class RedisCacheService:
     def __init__(self, redis_client: Redis):

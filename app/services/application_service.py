@@ -1,12 +1,11 @@
 from typing import Optional, List
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 from starlette import status
 
 from app.models.application import JobApplication
 from app.repositories import application_repository, job_repository
-from app.core.config import settings
+from app.config.settings import settings
 from app.utils.upload_file import upload_file_to_s3
 
 async def apply_to_job(
@@ -29,9 +28,15 @@ async def apply_to_job(
         raise HTTPException(status_code=400, detail="Not accepting application currently")
 
     # Check if already applied for the job
-    existing_application = await application_repository.get_by_candidate_and_job(db, job_id, candidate_id)
+    existing_application = await application_repository.get_by_candidate_and_job(
+        db, job_id, candidate_id
+    )
+
     if existing_application:
-        raise HTTPException(status_code=400, detail="You have already applied for this job")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="You have already applied for this job"
+        )
 
     # upload resume
     resume_url: Optional[str] = None

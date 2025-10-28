@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 class JobApplication(Base):
-    __tablename__ = 'application'
+    __tablename__ = 'job_applications'
     id:Mapped[int] = mapped_column(Integer, primary_key=True)
     candidate_id:Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     job_id:Mapped[int] = mapped_column(Integer, ForeignKey('jobs.id'), nullable=False)
@@ -20,7 +20,7 @@ class JobApplication(Base):
         default=ApplicationStatus.APPLIED,
         nullable=False
     )
-    resume_url:Mapped[str] = mapped_column(String, nullable=False)
+    resume_url:Mapped[str] = mapped_column(String, nullable=True)
     applied_at:Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     #relationships
     job:Mapped["Job"] = relationship("Job", back_populates="applications")

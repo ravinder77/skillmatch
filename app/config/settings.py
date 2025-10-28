@@ -3,7 +3,6 @@ from typing import List, Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-
 class Settings(BaseSettings):
     #CORE
     API_V1_STR: str = "/api/v1"
@@ -25,10 +24,17 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     REDIS_URL: str
     CACHE_EXPIRY: int = 300
-
     # Optional AWS
     AWS_S3_BUCKET: Optional[str] = None
     AWS_DEFAULT_REGION: Optional[str] = None
+
+    MAILTRAP_HOST: str
+    MAILTRAP_PORT: int
+    MAILTRAP_USER: str
+    MAILTRAP_PASS: str
+    SENDER_EMAIL: str
+
+    RABBITMQ_URL: str
 
     model_config = SettingsConfigDict(
         env_file=".env",

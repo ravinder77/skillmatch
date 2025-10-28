@@ -13,7 +13,7 @@ router = APIRouter()
 # ----------------------------------------------------------
 # Apply to a Job
 # ----------------------------------------------------------
-@router.post("/apply/{job_id}/", response_model=JobApplicationResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/{job_id}/apply", response_model=JobApplicationResponse, status_code=status.HTTP_201_CREATED)
 async def apply_job(
     job_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -25,6 +25,8 @@ async def apply_job(
       """
     if current_user.role.value != "candidate":
         raise HTTPException(status_code=401, detail="Not authorized to perform this action")
+
+    print(current_user)
 
     application = await application_service.apply_to_job(db, current_user.id, job_id, resume)
     return JobApplicationResponse.model_validate(application)
@@ -38,7 +40,7 @@ async def apply_job(
     response_model=List[JobApplicationResponse],
     status_code=status.HTTP_200_OK
 )
-async def list_jobs(
+async def list_applications(
         db: Annotated[AsyncSession, Depends(get_db)],
         current_user: Annotated[User, Depends(get_current_user)],
 ):

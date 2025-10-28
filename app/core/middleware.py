@@ -3,7 +3,7 @@ import time
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from app.core.config import settings
+from app.config.settings import settings
 
 
 async def logging_middleware(request: Request, call_next):

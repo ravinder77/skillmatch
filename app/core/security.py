@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import HTTPException
 from jose import JWTError, jwt, ExpiredSignatureError
 from passlib.hash import argon2
-from app.core.config import settings
+from app.config.settings import settings
 from app.core.enums import UserRole
 
 

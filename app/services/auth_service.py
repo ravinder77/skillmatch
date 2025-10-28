@@ -1,15 +1,13 @@
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from jose import JWTError, jwt
+from jose import JWTError
 from starlette import status
-from app.core.config import settings
 from app.core.security import (
     hash_password, verify_password, decode_token, generate_tokens
 )
 from app.schemas.auth import AuthResponse
 from app.schemas.user import UserCreate
 from app.models.user import User
-from app.core.enums import UserRole
 from app.repositories import user_repository
 
 

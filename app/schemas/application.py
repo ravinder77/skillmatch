@@ -17,9 +17,8 @@ class JobApplicationCreate(BaseModel):
 
 class JobApplicationResponse(BaseModel):
     id: int
-    message: str
     status: ApplicationStatus
-    resume_url: str
+    resume_url: Optional[HttpUrl] = None  # allow None
     applied_at: datetime
 
     model_config = ConfigDict(

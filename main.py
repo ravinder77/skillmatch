@@ -11,7 +11,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app.api.v1 import api_router
-from app.core.config import settings
+from app.config.settings import settings
 from app.core.middleware import register_middlewares
 from app.core.lifespan import lifespan
 from dotenv import load_dotenv
