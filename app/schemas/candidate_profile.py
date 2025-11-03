@@ -1,9 +1,6 @@
-from datetime import datetime
 
 from pydantic import BaseModel, HttpUrl, ConfigDict
-from typing import Optional, List
-from app.core.enums import ApplicationStatus
-
+from typing import Optional
 
 class CandidateProfileCreate(BaseModel):
     profile_image_url: Optional[str]

@@ -1,6 +1,7 @@
 booktype
 fastapi
 asyncpg
+redis==6.4.0,
 SQLAlchemy>=2.0.43
 pydantic>=2.11.0
 python-dotenv
@@ -22,6 +23,5 @@ jinja2
 sqlalchemy[asyncio]
 greenlet
 passlib[argon2]
-redis>=6.4.0
 aio-pika
 aiosmtplib

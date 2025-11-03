@@ -1,8 +1,6 @@
 import enum
 from typing import Optional
-
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
-
+from pydantic import BaseModel, ConfigDict
 from app.core.enums import UserRole
 
 

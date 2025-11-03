@@ -1,48 +1,82 @@
-version: '3.8'
-
 services:
-  redis:
-    image: redis:8.2.2-alpine
-    container_name: redis-server
-    restart: always
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
-    networks:
-      - skillmatch_net
-
 
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: skillmatch-app
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    restart: always
+    command: >
+      uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8000:8000"
     depends_on:
-      - redis
-      - postgres-db
-    environment:
-      DATABASE_URL: postgresql+asyncpg://ravinder:meet123@postgres-db:5432/skillmatch
+      rabbitmq:
+        condition: service_healthy
+      postgres-db:
+        condition: service_healthy
+    env_file:
+      - .env
     volumes:
-      - .:/code
+      - .:/app
     networks:
       - skillmatch_net
+
 
   postgres-db:
     image: postgres:17
     container_name: postgres-db
     restart: always
-    environment:
-      POSTGRES_USER: ravinder
-      POSTGRES_PASSWORD: meet123
-      POSTGRES_DB: skillmatch
+    env_file:
+      - .env
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ravinder -d skillmatch"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - skillmatch_net
+
+
+
+  # Rabbitmq
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"   # main connection port
+      - "15672:15672" # management ui
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - skillmatch_net
+
+  # Email Consumer Worker
+  email_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: email_worker
+    restart: always
+    command: python -m app.messaging.consumers.email_consumer
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - skillmatch_net
+
 
 volumes:
   postgres_data:

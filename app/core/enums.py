@@ -19,3 +19,5 @@ class ApplicationStatus(str, Enum):
     HIRED = "hired"
     REJECTED = "rejected"
     WITHDRAWN = "withdrawn"
+
+

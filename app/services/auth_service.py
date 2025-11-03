@@ -5,6 +5,7 @@ from starlette import status
 from app.core.security import (
     hash_password, verify_password, decode_token, generate_tokens
 )
+from app.messaging.producer import publish_message
 from app.schemas.auth import AuthResponse
 from app.schemas.user import UserCreate
 from app.models.user import User
@@ -35,6 +36,9 @@ async def signup_user(db: AsyncSession, body: UserCreate) -> tuple[AuthResponse,
 
     # generate tokens
     access_token, refresh_token = generate_tokens(user.id, user.role)
+
+    # publish message
+    await publish_message()
 
     # build response
     auth_body = AuthResponse(

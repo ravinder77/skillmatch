@@ -1,15 +1,7 @@
-"""
-SkillMatch Backend API
-A FastAPI application for tracking developer skills, projects,
-and generating AI-powered portfolio suggestions.
-"""
-
 import time
 import uvicorn
-
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-
 from app.api.v1 import api_router
 from app.config.settings import settings
 from app.core.middleware import register_middlewares
