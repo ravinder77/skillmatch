@@ -57,12 +57,12 @@ async def delete_job(db: AsyncSession, job_id: int, employer_id) -> None:
 
 
 async def update_job(db: AsyncSession, job_id: int, job_data, employer_id: int) -> Job:
-
     job = await job_repository.get_job_by_employer_id(db, job_id, employer_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found.")
     if job.employer_id != employer_id:
         raise HTTPException(status_code=401, detail="You are not allowed to edit this job.")
-
     updated_job = await job_repository.update(db, job_id, job_data)
     return updated_job
+
+
