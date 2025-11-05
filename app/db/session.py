@@ -17,5 +17,10 @@ AsyncSessionLocal = async_sessionmaker(
 # Dependency for fastapi routes
 async def get_db():
     async with AsyncSessionLocal() as session:
-        yield session
+        try:
+            yield session
+        finally:
+            await session.close()
+
+
 

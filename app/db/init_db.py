@@ -1,5 +1,5 @@
 from app.db.session import engine
-from app.db.base import Base
+from app.models.base import Base
 
 async def init_db() -> None:
     """Create all database tables asynchronously."""

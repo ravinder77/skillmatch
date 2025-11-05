@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy import create_engine, StaticPool
 from sqlalchemy.orm import  sessionmaker
-from app.db.base import Base
+from app.models.base import Base
 from fastapi.testclient import TestClient
 from app.core.enums import UserRole
 from main import app

@@ -3,7 +3,7 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
-from app.models.application import JobApplication
+from app.models.application import Application
 from app.repositories import application_repository, job_repository
 from app.config.settings import settings
 from app.utils.upload_file import upload_file_to_s3
@@ -13,7 +13,7 @@ async def apply_to_job(
         candidate_id: int,
         job_id: int,
         resume_file: Optional = None
-) -> JobApplication:
+) -> Application:
     """
       Allows a candidate (user) to apply for a job.
       Handles duplicate application checks and optional resume upload.
@@ -52,7 +52,7 @@ async def apply_to_job(
             )
 
     # Create Job Application object
-    job_application = JobApplication(
+    job_application = Application(
         candidate_id=candidate_id,
         job_id=job_id,
         resume_url=resume_url,
@@ -67,7 +67,7 @@ async def apply_to_job(
 async def get_all_applications_by_candidate(
         db: AsyncSession,
         candidate_id: int,
-) -> List[JobApplication]:
+) -> List[Application]:
 
 
     # Fetch all applications by this user
@@ -83,7 +83,7 @@ async def get_application_by_job_and_candidate(
     db: AsyncSession,
     candidate_id: int,
     job_id: int,
-) -> JobApplication:
+) -> Application:
     """
        Fetch a job application by job ID and candidate's ID.
        Raises:
