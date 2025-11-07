@@ -1,8 +1,6 @@
-import enum
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
 from app.core.enums import UserRole
-
 
 
 # Response schema for JWT Token
@@ -37,7 +35,6 @@ class Tokens(BaseModel):
 
 class AuthResponse(BaseModel):
     id: int
-    username: str
     email: str
     first_name: str
     last_name: str

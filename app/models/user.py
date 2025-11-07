@@ -16,12 +16,10 @@ if TYPE_CHECKING:
 class User(Base, TimestampMixin, SoftDeleteMixin):
     __tablename__ = "users"
 
-    id:Mapped[int] = mapped_column(Integer, primary_key=True, index=True, autoincrement=True)
-
     first_name:Mapped[str] = mapped_column(String(50), nullable=False)
     last_name:Mapped[str] = mapped_column(String(50), nullable=False)
     email:Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
-    hashed_password:Mapped[str] = mapped_column(String(255), nullable=False)
+    password_hash:Mapped[str] = mapped_column(String(255), nullable=False)
 
     role:Mapped[UserRole] = mapped_column(
         Enum(UserRole, values_callable=lambda x:[e.value for e in x], native_enum=False),
@@ -37,7 +35,7 @@ class User(Base, TimestampMixin, SoftDeleteMixin):
     # Relationships , user can create multiple companies
     companies: Mapped[List["Company"]] = relationship(
         "Company",
-        back_populates="owner",
+        back_populates="employer",
         cascade="all, delete-orphan"
     )
 
@@ -48,9 +46,9 @@ class User(Base, TimestampMixin, SoftDeleteMixin):
         cascade="all, delete-orphan"
     )
     # applications
-    applications:Mapped[List["Application"]] = relationship(
+    applications: Mapped[List["Application"]] = relationship(
         "Application",
-        back_populates="candidate",
+        back_populates="applicant",
         cascade="all, delete-orphan",
         lazy="selectin"
     )

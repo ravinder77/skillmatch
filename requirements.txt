@@ -25,3 +25,4 @@ greenlet
 passlib[argon2]
 aio-pika
 aiosmtplib
+PyJWT

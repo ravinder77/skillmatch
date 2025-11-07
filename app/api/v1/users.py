@@ -18,7 +18,6 @@ async def read_me(current_user: Annotated [User, Depends(get_current_user)]):
     """
     return {
         'id': current_user.id,
-        'username': current_user.username,
         'email': current_user.email,
         'role': current_user.role,
     }
@@ -31,8 +30,6 @@ async def update_me(
         db: Annotated[AsyncSession, Depends(get_db)]):
     """ Update the logged-in user and returns the updated record. """
 
-    if update_data.username is not None:
-        current_user.username = update_data.username
     if update_data.first_name is not None:
         current_user.first_name = update_data.first_name
     if update_data.last_name is not None:

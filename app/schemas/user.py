@@ -1,13 +1,21 @@
 from typing import Optional
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from app.core.enums import UserRole
+from datetime import datetime
 
+# Shared attributes
+class UserBase(BaseModel):
+    first_name: str = Field(..., min_length=1, max_length=50)
+    last_name: str = Field(..., min_length=1, max_length=50)
+    email: EmailStr
+    bio: Optional[str] = None
+    location: Optional[str] = None
+    role: UserRole = UserRole.CANDIDATE
 
 # ===========
 # Create User Schema
 # ===========
 class UserCreate(BaseModel):
-    username: str = Field(..., min_length=7, max_length=32)
     email: EmailStr
     first_name: str = Field( min_length=3, max_length=32)
     last_name: str = Field(min_length=3, max_length=32)
@@ -16,6 +24,8 @@ class UserCreate(BaseModel):
         max_length=256,
     )
     role: Optional[UserRole] = UserRole.CANDIDATE
+    bio: Optional[str] = None
+    location: Optional[str] = None
     is_active: bool = True
 
     model_config = ConfigDict(
@@ -32,31 +42,28 @@ class UserCreate(BaseModel):
 # Update User Schema
 # ============
 class UserUpdate(BaseModel):
-    username: Optional[str] = Field(None, min_length=7, max_length=32)
     first_name: Optional[str] = Field(None, min_length=3, max_length=32)
     last_name: Optional[str] = Field(None, min_length=3, max_length=32)
-    password: Optional[str] = Field(None, min_length=8, max_length=72, description="Password must be between 8 and 72 characters.")
+    bio: Optional[str] = None
+    location: Optional[str] = None
     is_active: Optional[bool] = None
 
     model_config = ConfigDict(
         from_attributes=True,
         extra="forbid",
         validate_by_name=True,
-        use_enum_values=True
     )
 
 
 # ===========
 # User Response
 # ==========
-class UserResponse(BaseModel):
+class UserResponse(UserBase):
     id: int
-    username: str
-    first_name: str
-    last_name: str
-    email: EmailStr
-    role: UserRole
-    is_active: Optional[bool] = None
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+    last_login_at: Optional[datetime] = None
 
     model_config = ConfigDict(
         from_attributes=True,

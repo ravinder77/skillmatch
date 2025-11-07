@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
 
     #CORE
-    API_V1_STR: str = "/api/v1"
+    API_V1_STR: str = "/api"
     PROJECT_NAME: str
     VERSION: str = "0.1.0"
     DEBUG: bool = True
@@ -24,11 +24,10 @@ class Settings(BaseSettings):
     # Authentication & Security
     ALGORITHM: str = "HS256"
     SECRET_KEY: str
+    ACCESS_TOKEN_SECRET: str
+    REFRESH_TOKEN_SECRET: str
     ACCESS_TOKEN_EXPIRY: int = 30
     REFRESH_TOKEN_EXPIRY: int = 1440
-
-
-    SECRET_KEY: str
 
     # Optional AWS
     AWS_S3_BUCKET: Optional[str] = None

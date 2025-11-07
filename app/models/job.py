@@ -35,7 +35,7 @@ class Job(Base, TimestampMixin):
     company_id:Mapped[int]= mapped_column(ForeignKey("companies.id", ondelete="CASCADE"), nullable=False)
     company: Mapped["Company"] = relationship("Company", back_populates="jobs")
     #
-    employer_id:Mapped[int]= mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    employer_id:Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     employer: Mapped["User"] = relationship("User", back_populates="jobs")
     #
     applications: Mapped[List["Application"]] = relationship("Application", back_populates="job", cascade="all, delete-orphan")

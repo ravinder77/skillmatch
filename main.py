@@ -2,7 +2,8 @@ import time
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from app.api.v1 import api_router
+
+from app.api.api_router import api_router
 from app.config.settings import settings
 from app.core.middleware import register_middlewares
 from app.core.lifespan import lifespan
@@ -15,7 +16,7 @@ load_dotenv()
 #setup logging
 setup_logging()
 
-app = FastAPI(title='Skillmatch', lifespan=lifespan)
+app = FastAPI(title='Skillmatch Job board api', version="1.0.0", lifespan=lifespan)
 
 
 

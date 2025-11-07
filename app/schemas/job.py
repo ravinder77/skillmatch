@@ -9,7 +9,7 @@ class JobCreate(BaseModel):
     description: str
     skills_required: List[str]
     experience_required: int
-    job_type: Optional[JobType.FULL_TIME]
+    job_type: Optional[JobType]
     min_salary: int
     max_salary: int
     min_salary: int
@@ -31,7 +31,7 @@ class JobUpdate(BaseModel):
     description: Optional[str] = None
     skills_required: Optional[List[str]]
     experience_required: Optional[int]
-    job_type: Optional[JobType.FULL_TIME]
+    job_type: Optional[JobType]
     min_salary: Optional[int]
     max_salary: Optional[int]
     location: Optional[str]
@@ -51,7 +51,7 @@ class JobResponse(BaseModel):
     description: str
     skills_required: List[str]
     experience_required: int
-    job_type: Optional[JobType.FULL_TIME]
+    job_type: Optional[JobType]
     min_salary: int
     max_salary: int
     location: Optional[str]

@@ -30,6 +30,7 @@ class JobService:
         await self.repo.create(new_job)
         return JobResponse.model_validate(new_job)
 
+    # TODO: add pagination
     async def get_all_active_jobs(self) -> List[Job]:
         jobs = await self.repo.get_all()
         if not jobs or len(jobs) == 0:
@@ -39,6 +40,7 @@ class JobService:
             )
         return jobs
 
+    #
     async def get_job_by_id(self, job_id: int) -> JobResponse:
         """ Retrieve a job by its ID or raise 404 if not found. """
         job = await self.repo.get_by_id(job_id)
