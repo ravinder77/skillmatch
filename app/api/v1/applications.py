@@ -1,24 +1,27 @@
 from fastapi import APIRouter, Depends, status, HTTPException, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated, Optional, List
+
+from app.dependencies.application import get_application_service
 from app.dependencies.auth import get_current_user
 from app.core.enums import UserRole
 from app.schemas.application import JobApplicationResponse
-from app.db.session import get_db
 from app.models.user import User
-from app.services import application_service
+from app.services.application_service import ApplicationService
 
 router = APIRouter()
 
 # ----------------------------------------------------------
 # Apply to a Job
 # ----------------------------------------------------------
-@router.post("/{job_id}/apply", response_model=JobApplicationResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/{job_id}/apply",
+             response_model=JobApplicationResponse,
+             status_code=status.HTTP_201_CREATED)
 async def apply_job(
     job_id: int,
-    db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
-    resume: Optional[UploadFile] = File(None)
+    app_service: Annotated[ApplicationService, Depends(get_application_service)],
+    resume: Optional[UploadFile] = File(None),
 ):
     """
       Apply to a job by providing a job ID and optional resume file.
@@ -28,7 +31,7 @@ async def apply_job(
 
     print(current_user)
 
-    application = await application_service.apply_to_job(db, current_user.id, job_id, resume)
+    application = await app_service.apply_to_job(current_user.id, job_id, resume)
     return JobApplicationResponse.model_validate(application)
 
 
@@ -41,7 +44,7 @@ async def apply_job(
     status_code=status.HTTP_200_OK
 )
 async def list_applications(
-        db: Annotated[AsyncSession, Depends(get_db)],
+        app_service: Annotated[ApplicationService, Depends(get_application_service)],
         current_user: Annotated[User, Depends(get_current_user)],
 ):
     """
@@ -53,7 +56,7 @@ async def list_applications(
             detail="Not authorized to perform this action"
         )
 
-    applications =await application_service.get_all_applications_by_candidate(db, current_user.id)
+    applications =await app_service.get_all_applications_by_applicant(current_user.id)
     return applications
 
 
@@ -65,7 +68,7 @@ async def list_applications(
 @router.get('/{job_id}', response_model=JobApplicationResponse, status_code=200)
 async def get_application_by_job(
     job_id: int,
-    db: Annotated[AsyncSession, Depends(get_db)],
+    app_service: Annotated[ApplicationService, Depends(get_application_service)],
     current_user: Annotated[User, Depends(get_current_user)],
 
 ):
@@ -78,5 +81,5 @@ async def get_application_by_job(
             detail="Not authorized to perform this action"
         )
 
-    application = await application_service.get_application_by_job_and_candidate(db, job_id, current_user.id)
+    application = await app_service.get_application_by_applicant_and_job(job_id, current_user.id)
     return JobApplicationResponse.model_validate(application)

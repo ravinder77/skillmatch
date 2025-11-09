@@ -10,9 +10,9 @@ from app.utils.upload_file import upload_file_to_s3
 
 
 class ApplicationService:
-    def __init__(self, application_repo: ApplicationRepository, job_repo: JobRepository):
+    def __init__(self, application_repo: ApplicationRepository, job_repository: JobRepository):
         self.application_repository = application_repo
-        self.job_repository = job_repo
+        self.job_repository = job_repository
 
     async def apply_to_job(
             self,
