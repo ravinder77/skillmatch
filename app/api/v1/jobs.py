@@ -39,7 +39,6 @@ async def delete_job(
         service: Annotated[JobService, Depends(get_job_service)],
 ):
     await service.delete_job(job_id, current_employer.id)
-
     return {
         "message": "Job deleted successfully."
     }
@@ -60,7 +59,6 @@ async def get_all_active_jobs(
     """ Retrieve all active jobs """
     jobs = await service.get_all_active_jobs()
     jobs_list = [JobResponse.model_validate(job).model_dump() for job in jobs]
-
     return jobs_list
 
 

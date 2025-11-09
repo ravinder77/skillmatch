@@ -1,7 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel, HttpUrl, ConfigDict
 
-
 class CompanyBase(BaseModel):
     name: str
     description: Optional[str] = None
@@ -17,13 +16,19 @@ class CompanyBase(BaseModel):
         extra='forbid',
     )
 
-class CompanyCreate(CompanyBase):
-    owner_id: int
+class CompanyCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    website: Optional[HttpUrl] = None
+    location: Optional[str] = None
+    logo_url: Optional[HttpUrl] = None
+    size: Optional[str] = None
+    industry: Optional[str] = None
 
     model_config = ConfigDict(
         from_attributes=True,
-        extra='forbid',
         validate_by_name=True,
+        extra='forbid',
     )
 
 class CompanyUpdate(BaseModel):
