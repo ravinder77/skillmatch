@@ -1,8 +1,7 @@
 from typing import List
-
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+
 from app.repositories.base import BaseRepository
 from app.models import Company
 

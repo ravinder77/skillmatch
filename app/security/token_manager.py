@@ -1,6 +1,7 @@
-import jwt
+from jose import jwt, ExpiredSignatureError
 from datetime import datetime, timedelta
 from typing import Any, Dict
+
 from app.config.settings import settings
 
 
@@ -18,18 +19,18 @@ class TokenManager:
 
     def create_access_token(self, data: Dict[str, Any]) -> str:
         """Generate a short-lived access token."""
-        to_encode = data.copy()
+        payload = data.copy()
         now = datetime.now()
         expire = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRY)
-        to_encode.update({"exp": expire})
-        return jwt.encode(to_encode, self.access_secret_key, algorithm=self.algorithm)
+        payload.update({"exp": expire, "iat": now})
+        return jwt.encode(payload, self.access_secret_key, algorithm=self.algorithm)
 
     def create_refresh_token(self, data: Dict[str, Any]) -> str:
         """Generate a longer-lived refresh token."""
         payload = data.copy()
         now = datetime.now()
         expire = now + timedelta(minutes=settings.REFRESH_TOKEN_EXPIRY)
-        payload.update({"exp": expire})
+        payload.update({"exp": expire, "iat": now})
         return jwt.encode(payload, self.refresh_secret_key, algorithm=self.algorithm)
 
     def decode_token(self, token: str, is_refresh: bool = False) -> Dict[str, Any]:
@@ -38,10 +39,8 @@ class TokenManager:
         try:
             payload = jwt.decode(token, secret_key, algorithms=[self.algorithm])
             return payload
-        except jwt.ExpiredSignatureError:
+        except ExpiredSignatureError:
             raise ValueError("Token has expired")
-        except jwt.InvalidTokenError:
-            raise ValueError("Invalid token")
 
     def verify_token(self, token: str, is_refresh: bool = False) -> bool:
         """Verify if a token is valid and not expired."""

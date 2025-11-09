@@ -1,69 +1,55 @@
 from typing import Annotated
-from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
-from fastapi.responses import JSONResponse
-from app.db.session import get_db
-from app.schemas.auth import AuthResponse, Token, LoginRequest
-from app.schemas.user import UserCreate
-from app.services import auth_service as auth_service
+from app.dependencies.auth import get_auth_service
+from app.dependencies.user import get_user_service
+from app.schemas.auth import TokenResponse, LoginRequest
+from app.schemas.user import UserCreate, UserResponse
 import logging
+from app.services.auth_service import AuthService
+from app.services.user_service import UserService
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 @router.post(
-    "/signup", response_model=AuthResponse, status_code=status.HTTP_201_CREATED
+    "/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED
 )
 async def signup(
         body: UserCreate,
-        response: Response,
-        db: Annotated[AsyncSession, Depends(get_db)]):
-    """ Signup endpoint for users. """
+        user_service: Annotated[UserService, Depends(get_user_service)]
+):
+    """Sign up new user"""
+    new_user = await user_service.create_user(body)
+    return new_user
 
-    auth_response, refresh_token = await auth_service.signup_user(db, body)
-
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        httponly=True,
-        secure=True,
-        samesite="strict",
-        max_age=7 * 24 * 60 * 60,
-    )
-
-    return auth_response
-
-
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=TokenResponse, status_code=status.HTTP_200_OK)
 async def login(
         login_data: LoginRequest,
-        db: Annotated[AsyncSession, Depends(get_db)]
+        response: Response,
+        auth_service: Annotated[AuthService, Depends(get_auth_service)]
 ):
-    """ Login endpoint using OAuth2 password flow """
-    access_token, refresh_token = await auth_service.login_user(db, login_data.email, login_data.password)
+    """Authenticate user and issue tokens"""
+    tokens = await auth_service.authenticate_user(login_data.email, login_data.password)
 
-    response = JSONResponse(
-        content={
-            "access_token": access_token,
-            "token_type": "bearer",
-        }
-    )
     response.set_cookie(
         key="refresh_token",
-        value=refresh_token,
+        value=tokens.refresh_token,
         httponly=True,
         secure=True,
         samesite="strict",
         max_age=7 * 24 * 60 * 60,  # 7 days
     )
 
-    return response
+    return TokenResponse(
+        access_token=tokens.access_token,
+        token_type=tokens.token_type,
+    )
 
 
-@router.post("/refresh", response_model=Token, status_code=status.HTTP_200_OK)
+@router.post("/refresh", response_model=TokenResponse, status_code=status.HTTP_200_OK)
 async def refresh(
-    db: Annotated[AsyncSession, Depends(get_db)],
     response: Response,
+    auth_service: Annotated[AuthService, Depends(get_auth_service)],
     refresh_token: str = Cookie(None),
 ):
     """ Refresh access token using http-only refresh token cookies """
@@ -71,36 +57,33 @@ async def refresh(
         raise HTTPException(status_code=401, detail="Refresh token required")
 
     try:
-        access_token, refresh_token = await auth_service.refresh_tokens(db, refresh_token)
+        tokens = await auth_service.refresh_tokens(refresh_token)
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
 
     response.set_cookie(
         key="refresh_token",
-        value=refresh_token,
+        value=tokens.refresh_token,
         httponly=True,
         secure=True,
         samesite="strict",
         max_age=7 * 24 * 60 * 60,
     )
     logger.info("Access token refreshed successfully")
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-    }
-
+    return TokenResponse(
+        access_token=tokens.access_token,
+        token_type=tokens.token_type
+    )
 
 @router.post("/logout", status_code=status.HTTP_200_OK)
 async def logout(response: Response):
     """
     logout user by clearing refresh token cookies
     """
-
     response.delete_cookie(
         key="refresh_token",
-        path="/",  # use same path which was used to set the cookie
+        path="/",
         secure=True,
-        # domain="None", # optional: set domain if cookie was set with domain
         httponly=True,
         samesite="strict",
     )

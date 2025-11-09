@@ -2,8 +2,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from fastapi import HTTPException
-
 from typing import Optional, List
+
 from app.models.job import Job
 from app.repositories.base import BaseRepository
 

@@ -23,7 +23,6 @@ class Settings(BaseSettings):
 
     # Authentication & Security
     ALGORITHM: str = "HS256"
-    SECRET_KEY: str
     ACCESS_TOKEN_SECRET: str
     REFRESH_TOKEN_SECRET: str
     ACCESS_TOKEN_EXPIRY: int = 30

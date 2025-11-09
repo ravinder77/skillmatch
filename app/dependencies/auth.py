@@ -1,23 +1,31 @@
 from typing import Annotated
-from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends, HTTPException
 from starlette import status
 from fastapi.security import OAuth2PasswordBearer
-from app.db.session import get_db
+from app.dependencies.user import get_user_service, get_user_repository
 from app.models.user import User
 from app.core.enums import UserRole
-from app.services import auth_service
+from app.repositories.user_repository import UserRepository
+from app.schemas.user import UserResponse
+from app.security.token_manager import TokenManager
+from app.services.auth_service import AuthService
+from app.services.user_service import UserService
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 async def get_current_user(
         token: Annotated[str, Depends(oauth2_scheme)],
-        db: Annotated[AsyncSession, Depends(get_db)]) -> User:
+        user_service: Annotated[UserService, Depends(get_user_service)],
+) -> UserResponse:
     """
     Dependency that extracts the current user from the JWT token.
     Raises 401 if the token is invalid or the user is not authenticated
     """
-    user = await auth_service.get_user_from_token(db, token)
+    token_manager = TokenManager()
+    payload = token_manager.decode_token(token)
+    user_id = int(payload.get("sub"))
+    user = await user_service.get_user_by_id(user_id)
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -37,3 +45,7 @@ async def get_current_employer(
             detail="You do not have permission to perform this action.",
         )
     return current_user
+
+
+async def get_auth_service(repo: Annotated[UserRepository, Depends(get_user_repository)]) -> AuthService:
+    return AuthService(repo)
