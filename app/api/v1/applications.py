@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, status, HTTPException, UploadFile, File
-from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated, Optional, List
 
 from app.dependencies.application import get_application_service
@@ -29,8 +28,6 @@ async def apply_job(
     if current_user.role.value != "candidate":
         raise HTTPException(status_code=401, detail="Not authorized to perform this action")
 
-    print(current_user)
-
     application = await app_service.apply_to_job(current_user.id, job_id, resume)
     return JobApplicationResponse.model_validate(application)
 
@@ -47,20 +44,16 @@ async def list_applications(
         app_service: Annotated[ApplicationService, Depends(get_application_service)],
         current_user: Annotated[User, Depends(get_current_user)],
 ):
-    """
-       Fetch all job applications submitted by the current logged-in user.
-       """
+    """ Fetch all job applications submitted by the current logged-in user"""
+
     if current_user.role.value != "candidate":
         raise HTTPException(
             status_code=401,
             detail="Not authorized to perform this action"
         )
 
-    applications =await app_service.get_all_applications_by_applicant(current_user.id)
+    applications = await app_service.get_all_applications_by_applicant(current_user.id)
     return applications
-
-
-
 
 # ----------------------------------------------------------
 # Get Application by Job ID

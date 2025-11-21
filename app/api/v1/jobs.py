@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
-from typing import Annotated, List
+from fastapi import APIRouter, Depends, HTTPException, Query
+from typing import Annotated, List, Optional
 from starlette import status
 
 from app.dependencies.jobs import get_job_service
@@ -43,9 +43,8 @@ async def delete_job(
         "message": "Job deleted successfully."
     }
 
-
 # ----------------------------------------------------------
-# Get All Active Jobs (for candidates)
+# Get All Active Jobs (pagination, filtering, searching)
 # ----------------------------------------------------------
 @router.get(
     "/",
@@ -54,13 +53,22 @@ async def delete_job(
 )
 async def get_all_active_jobs(
         service: Annotated[JobService, Depends(get_job_service)],
-
+        page: int = Query(1, ge=0),
+        limit: int = Query(10, ge=1, le=100),
+        search: Optional[str] = Query(None),
+        location: Optional[str] = Query(None),
+        job_type: Optional[str] = Query(None),
 ):
     """ Retrieve all active jobs """
-    jobs = await service.get_all_active_jobs()
+    jobs = await service.get_all_active_jobs(
+        page=page,
+        limit=limit,
+        search=search,
+        location=location,
+        job_type=job_type
+    )
     jobs_list = [JobResponse.model_validate(job).model_dump() for job in jobs]
     return jobs_list
-
 
 # ----------------------------------------------------------
 # Get a Single Job by ID

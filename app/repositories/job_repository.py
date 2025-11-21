@@ -33,9 +33,42 @@ class JobRepository(BaseRepository[Job]):
         result = await self.db.execute(query)
         return result.scalars().first()
 
-    async def get_all(self, skip: int = 0, limit: int = 10) -> List[Job]:
+    async def get_all(
+            self,
+            page: int,
+            limit: int,
+            search: Optional[str],
+            location: Optional[str],
+            job_type: Optional[str],
+            experience: Optional[str]) -> List[Job]:
         """ Fetch all jobs with pagination """
-        query = select(Job).where(Job.is_active == True).offset(skip).limit(limit)
+        # base query
+        query = select(Job).where(Job.is_active == True)
+
+        # --searching--
+        if search:
+            query = query.where(
+                Job.job_type.ilike(f"%{search}%"),
+            )
+
+        # --filtering--
+        if location:
+            query = query.where(
+                Job.location.ilike(f"%{location}%"),
+            )
+
+        if job_type:
+            query = query.where(Job.job_type == job_type),
+
+        if experience:
+            query = query.where(Job.experience_required == experience),
+
+        # --pagination--
+        offset = (page - 1) * limit
+        query = query.offset(offset).limit(limit)
+
+
+
         result = await self.db.execute(query)
         return list(result.scalars().all())
 

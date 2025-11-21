@@ -1,5 +1,6 @@
 from typing import Optional
-from pydantic import BaseModel, HttpUrl, ConfigDict
+from pydantic import BaseModel, HttpUrl, ConfigDict, field_validator
+
 
 class CompanyBase(BaseModel):
     name: str
@@ -32,6 +33,7 @@ class CompanyCreate(BaseModel):
     )
 
 class CompanyUpdate(BaseModel):
+    name: str
     description: Optional[str] = None
     website: Optional[HttpUrl] = None
     location: Optional[str] = None
@@ -46,3 +48,12 @@ class CompanyUpdate(BaseModel):
         extra='forbid',
     )
 
+class CompanyResponse(BaseModel):
+    name: str
+    description: Optional[str] = None
+    website: Optional[str] = None
+    location: Optional[str] = None
+    logo_url: Optional[HttpUrl] = None
+    is_active: Optional[bool] = None
+    size: Optional[str] = None
+    industry: Optional[str] = None

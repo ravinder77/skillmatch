@@ -1,5 +1,4 @@
-from typing import List
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List, Optional
 from fastapi import HTTPException
 from starlette import status
 from app.models.job import Job
@@ -23,7 +22,6 @@ class JobService:
             min_salary=job_in.min_salary,
             max_salary=job_in.max_salary,
             location=job_in.location,
-            company_id=job_in.company_id,
             employer_id=employer_id,
         )
 
@@ -31,8 +29,24 @@ class JobService:
         return JobResponse.model_validate(new_job)
 
     # TODO: add pagination
-    async def get_all_active_jobs(self) -> List[Job]:
-        jobs = await self.job_repo.get_all()
+    async def get_all_active_jobs(
+            self,
+            page: int,
+            limit: int,
+            search: Optional[str],
+            location: Optional[str],
+            job_type: Optional[str],
+            experience: Optional[str],
+    ) -> List[Job]:
+
+        jobs = await self.job_repo.get_all(
+            page=page,
+            limit=limit,
+            search=search,
+            location=location,
+            job_type=job_type,
+            experience=experience
+        )
         if not jobs or len(jobs) == 0:
             raise HTTPException(
                 status_code=404,

@@ -18,7 +18,7 @@ class BaseRepository(Generic[ModelType]):
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def get_all(self) -> List[ModelType]:
+    async def get_all(self, *args, **kwargs) -> List[ModelType]:
         stmt = select(self.model)
         result = await self.db.execute(stmt)
         return list(result.scalars().all())

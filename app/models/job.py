@@ -18,9 +18,10 @@ class Job(Base, TimestampMixin):
     experience_required:Mapped[int] = mapped_column(Integer, nullable=False)
     min_salary:Mapped[int] = mapped_column(Integer, nullable=False)
     max_salary:Mapped[int] = mapped_column(Integer, nullable=False)
-    job_type: Mapped[JobType] = mapped_column(Enum(JobType), default=JobType.FULL_TIME, nullable=False)
     location:Mapped[Optional[str]]= mapped_column(String, nullable=True, index=True)
     is_active:Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+    job_type: Mapped[JobType] = mapped_column(Enum(JobType), default=JobType.FULL_TIME, nullable=False)
 
     posted_at:Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -33,9 +34,13 @@ class Job(Base, TimestampMixin):
         nullable=True
     )
     company_id:Mapped[int]= mapped_column(ForeignKey("companies.id", ondelete="CASCADE"), nullable=False)
-    company: Mapped["Company"] = relationship("Company", back_populates="jobs")
-    #
     employer_id:Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+
+    # Relationships
+    company: Mapped["Company"] = relationship("Company", back_populates="jobs")
     employer: Mapped["User"] = relationship("User", back_populates="jobs")
-    #
-    applications: Mapped[List["Application"]] = relationship("Application", back_populates="job", cascade="all, delete-orphan")
+    applications: Mapped[List["Application"]] = relationship(
+        "Application",
+        back_populates="job",
+        cascade="all, delete-orphan"
+    )

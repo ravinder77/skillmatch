@@ -15,7 +15,6 @@ class JobCreate(BaseModel):
     min_salary: int
     max_salary: int
     location: Optional[str]
-    company_id: int
 
     model_config = ConfigDict(
         from_attributes=True,
@@ -56,7 +55,6 @@ class JobResponse(BaseModel):
     max_salary: int
     location: Optional[str]
     employer_id: int
-    company_id: int
 
     model_config = ConfigDict(
         from_attributes=True,

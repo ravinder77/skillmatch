@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, Enum, Integer, String, Text, DateTime
+from sqlalchemy import Boolean, Enum, Integer, String, Text, DateTime, ForeignKey
 from typing import TYPE_CHECKING, List, Optional
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.enums import UserRole
@@ -20,25 +20,23 @@ class User(Base, TimestampMixin, SoftDeleteMixin):
     last_name:Mapped[str] = mapped_column(String(50), nullable=False)
     email:Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
     password_hash:Mapped[str] = mapped_column(String(255), nullable=False)
-
     role:Mapped[UserRole] = mapped_column(
         Enum(UserRole, values_callable=lambda x:[e.value for e in x], native_enum=False),
-        default=UserRole.CANDIDATE,
+        default=UserRole.APPLICANT,
         nullable=False
     )
-
     bio: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     location: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     last_login_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     is_active:Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
-    # Relationships , user can create multiple companies
+    # Employer specific
+    # Relationships
     companies: Mapped[List["Company"]] = relationship(
         "Company",
-        back_populates="employer",
-        cascade="all, delete-orphan"
+        back_populates="owner",
+        cascade="all, delete-orphan",
     )
-
     # jobs
     jobs: Mapped[List["Job"]] = relationship(
         "Job",

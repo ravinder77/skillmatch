@@ -10,7 +10,7 @@ class UserBase(BaseModel):
     email: EmailStr
     bio: Optional[str] = None
     location: Optional[str] = None
-    role: UserRole = UserRole.CANDIDATE
+    role: UserRole = UserRole.APPLICANT
 
 # ===========
 # Create User Schema
@@ -23,7 +23,7 @@ class UserCreate(BaseModel):
         min_length=7,
         max_length=256,
     )
-    role: Optional[UserRole] = UserRole.CANDIDATE
+    role: Optional[UserRole] = UserRole.APPLICANT
     bio: Optional[str] = None
     location: Optional[str] = None
     is_active: bool = True
