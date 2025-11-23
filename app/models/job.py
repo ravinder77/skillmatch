@@ -44,7 +44,6 @@ class Job(Base, TimestampMixin):
         ForeignKey("employer_profiles.id", ondelete="CASCADE"),
         nullable=False
     )
-
     # Relationships
     company: Mapped["Company"] = relationship(
         "Company",

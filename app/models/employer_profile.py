@@ -12,7 +12,6 @@ if TYPE_CHECKING:
 class EmployerProfile(Base):
     __tablename__ = "employer_profiles"
 
-
     user_id = mapped_column( ForeignKey("users.id"), nullable=False)
     company_id = mapped_column(ForeignKey("companies.id"), nullable=False)
     role: Mapped[EmployerRole] = mapped_column(
@@ -22,9 +21,9 @@ class EmployerProfile(Base):
     )
 
     # Relationship
-    user: Mapped["User"] = relationship(User, back_populates="employer_profile")
-    company: Mapped["Company"] = relationship(Company, back_populates="employer_profiles")
-    jobs: Mapped["Job"] = relationship(Job, back_populates="employer_profile")
+    user: Mapped["User"] = relationship("User", back_populates="employer_profile")
+    company: Mapped["Company"] = relationship("Company", back_populates="employer_profiles")
+    jobs: Mapped["Job"] = relationship("Job", back_populates="employer_profile")
 
 
 
