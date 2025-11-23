@@ -6,7 +6,7 @@ from app.db.mixins import TimestampMixin
 from app.models.base import Base
 
 if TYPE_CHECKING:
-    from app.models import Job, User
+    from app.models import Job, User, EmployerProfile
 
 class Company(Base, TimestampMixin):
     __tablename__ = "companies"
@@ -16,14 +16,21 @@ class Company(Base, TimestampMixin):
     website: Mapped[str] = mapped_column(String(255), nullable=True)
     location: Mapped[str] = mapped_column(String(255), nullable=True)
     logo_url: Mapped[str] = mapped_column(String(255), nullable=True)
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     size: Mapped[str] = mapped_column(String(50), nullable=True)
     industry: Mapped[str] = mapped_column(String(100), nullable=True)
-    owner_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
     # relationships
-    owner: Mapped["User"] = relationship("User", back_populates="companies")
-    jobs: Mapped[List["Job"]] = relationship("Job", back_populates="company", cascade="all, delete-orphan")
+    # Many employer_profiles can be tied to a company
+    employer_profiles: Mapped[List["EmployerProfile"]] = relationship(
+        "EmployerProfile",
+        back_populates="company",
+        cascade="all, delete-orphan"
+    )
+    # multiple jobs belong to one company
+    jobs: Mapped[List["Job"]] = relationship(
+        "Job",
+        back_populates="company",
+        cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Company=({self.name})>"
