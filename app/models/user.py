@@ -9,7 +9,7 @@ from app.db.mixins import TimestampMixin, SoftDeleteMixin
 
 
 if TYPE_CHECKING:
-    from app.models import Job, Company, Application
+    from app.models import Job, Company, Application, EmployerProfile
 
 
 # User Model
@@ -30,19 +30,13 @@ class User(Base, TimestampMixin, SoftDeleteMixin):
     last_login_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     is_active:Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
-    # Employer specific
-    # Relationships
-    companies: Mapped[List["Company"]] = relationship(
-        "Company",
-        back_populates="owner",
-        cascade="all, delete-orphan",
+    # user may have employer profile
+    employer_profile: Mapped["EmployerProfile"] = relationship(
+        "EmployerProfile",
+        back_populates="user",
+        uselist=False,
     )
-    # jobs
-    jobs: Mapped[List["Job"]] = relationship(
-        "Job",
-        back_populates="employer",
-        cascade="all, delete-orphan"
-    )
+
     # applications
     applications: Mapped[List["Application"]] = relationship(
         "Application",

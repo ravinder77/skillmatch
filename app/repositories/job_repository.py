@@ -20,11 +20,9 @@ class JobRepository(BaseRepository[Job]):
             await self.db.commit()
             await self.db.refresh(job)
             return job
-        except IntegrityError:
+        except Exception as err:
             await self.db.rollback()
-            raise HTTPException(status_code=400, detail="Job with these details already exists")
-        except Exception:
-            await self.db.rollback()
+            print(err)
             raise HTTPException(status_code=500, detail="Internal Server Error while creating job")
 
     async def get_by_id(self, job_id: int) -> Optional[Job]:
@@ -66,8 +64,6 @@ class JobRepository(BaseRepository[Job]):
         # --pagination--
         offset = (page - 1) * limit
         query = query.offset(offset).limit(limit)
-
-
 
         result = await self.db.execute(query)
         return list(result.scalars().all())

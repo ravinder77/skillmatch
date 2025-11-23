@@ -5,6 +5,11 @@ class UserRole(str, Enum):
     EMPLOYER = "employer"
     ADMIN = "admin"
 
+class EmployerRole(str, Enum):
+    ADMIN = "admin"
+    MANAGER = "manager"
+    RECRUITER = "recruiter"
+
 # Project Status Enum
 class ProjectStatus(str, Enum):
     IN_PROGRESS = "in-progress"

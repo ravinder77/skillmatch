@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
 from typing import TYPE_CHECKING, Optional, List
 from sqlalchemy import Integer, String, ForeignKey, Text, JSON, DateTime, func, Boolean, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -30,9 +31,10 @@ class Job(Base, TimestampMixin):
     )
     expires_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True),
-        default=lambda:datetime.now() + timedelta(days=30),
+        default=lambda:datetime.now(timezone.utc) + timedelta(days=30),
         nullable=True
     )
+    # -- Foreign Keys --
     company_id:Mapped[int]= mapped_column(ForeignKey("companies.id", ondelete="CASCADE"), nullable=False)
     employer_id:Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
