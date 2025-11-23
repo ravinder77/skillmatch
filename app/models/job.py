@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Optional, List
 from sqlalchemy import Integer, String, ForeignKey, Text, JSON, DateTime, func, Boolean, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.enums import JobType
+from app.models import EmployerProfile
 from app.models.base import Base
 from app.db.mixins import TimestampMixin
 
@@ -35,12 +36,24 @@ class Job(Base, TimestampMixin):
         nullable=True
     )
     # -- Foreign Keys --
-    company_id:Mapped[int]= mapped_column(ForeignKey("companies.id", ondelete="CASCADE"), nullable=False)
-    employer_id:Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    company_id:Mapped[int]= mapped_column(
+        ForeignKey("companies.id", ondelete="CASCADE"),
+        nullable=False
+    )
+    employer_profile_id:Mapped[int] = mapped_column(
+        ForeignKey("employer_profiles.id", ondelete="CASCADE"),
+        nullable=False
+    )
 
     # Relationships
-    company: Mapped["Company"] = relationship("Company", back_populates="jobs")
-    employer: Mapped["User"] = relationship("User", back_populates="jobs")
+    company: Mapped["Company"] = relationship(
+        "Company",
+        back_populates="jobs"
+    )
+    employer_profile: Mapped["EmployerProfile"] = relationship(
+        "EmployerProfile",
+        back_populates="jobs"
+    )
     applications: Mapped[List["Application"]] = relationship(
         "Application",
         back_populates="job",
