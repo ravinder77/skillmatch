@@ -17,16 +17,26 @@ class Application(Base, TimestampMixin):
        for a particular job posting.
        """
     __tablename__ = 'applications'
-    # foreign ids
-    applicant_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
-    job_id: Mapped[int] = mapped_column(Integer, ForeignKey('jobs.id', ondelete="CASCADE"), nullable=False)
+    # foreign keys
+    applicant_id: Mapped[int] = mapped_column(
+        ForeignKey('users.id', ondelete="CASCADE"),
+        nullable=False
+    )
+    job_id: Mapped[int] = mapped_column(
+        ForeignKey('jobs.id', ondelete="CASCADE"),
+        nullable=False
+    )
     # application_status
     status:Mapped[ApplicationStatus] = mapped_column(
         Enum(ApplicationStatus, values_callable=lambda x:[e.value for e in x], native_enum=False),
         default=ApplicationStatus.APPLIED,
         nullable=False
     )
+    # application content
+    cover_letter: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     resume_url:Mapped[Optional[str]] = mapped_column(String, nullable=True)
+
+
     applied_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
