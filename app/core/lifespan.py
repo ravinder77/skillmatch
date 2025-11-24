@@ -1,6 +1,7 @@
-from contextlib import asynccontextmanager
-from app.db.init_db import init_db
 import logging
+from contextlib import asynccontextmanager
+
+from app.db.init_db import init_db
 
 logger = logging.getLogger(__name__)
 

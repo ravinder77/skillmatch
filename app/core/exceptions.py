@@ -1,4 +1,3 @@
-
 class SkillMatchException(Exception):
     """
     Base exception class for Skill Match exceptions.

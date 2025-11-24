@@ -1,20 +1,20 @@
 import pytest
-from sqlalchemy import create_engine, StaticPool
-from sqlalchemy.orm import  sessionmaker
-from app.models.base import Base
 from fastapi.testclient import TestClient
+from sqlalchemy import StaticPool, create_engine
+from sqlalchemy.orm import sessionmaker
+
 from app.core.enums import UserRole
+from app.models.base import Base
 from main import app
 
 TEST_DATABASE_URL = "sqlite:///./testdb.db"
 
 engine = create_engine(
-    TEST_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool
+    TEST_DATABASE_URL, connect_args={"check_same_thread": False}, poolclass=StaticPool
 )
 
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
 
 # Override FastAPI dependencies
 def override_get_db():
@@ -23,6 +23,7 @@ def override_get_db():
         yield db
     finally:
         db.close()
+
 
 def override_current_user():
     return {
@@ -35,6 +36,7 @@ def override_current_user():
         "role": "candidate",
     }
 
+
 @pytest.fixture(scope="function", autouse=True)
 def db_session():
     Base.metadata.drop_all(bind=engine)
@@ -44,7 +46,6 @@ def db_session():
         yield session
     finally:
         session.close()
-
 
 
 @pytest.fixture(scope="function")
@@ -62,4 +63,3 @@ def user_payload():
         "password": "ravinder123",
         "role": UserRole.CANDIDATE.value,
     }
-

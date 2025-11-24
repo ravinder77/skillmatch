@@ -1,9 +1,12 @@
 from typing import Optional
+
 import aio_pika
+
 from app.config.settings import settings
 
-#Optional: A global connection to reuse
+# Optional: A global connection to reuse
 _connection: Optional[aio_pika.RobustConnection] = None
+
 
 async def get_connection():
     """

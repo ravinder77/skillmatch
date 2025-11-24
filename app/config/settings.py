@@ -1,10 +1,11 @@
 from typing import List, Optional
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
 
-    #CORE
+    # CORE
     API_V1_STR: str = "/api"
     PROJECT_NAME: str
     VERSION: str = "0.1.0"
@@ -15,7 +16,7 @@ class Settings(BaseSettings):
     CORS_ORIGINS: List[str] = ["*"]
     ALLOWED_HOSTS: List[str] = ["*"]
 
-    #DATABASE
+    # DATABASE
     DATABASE_URL: str
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
@@ -32,7 +33,7 @@ class Settings(BaseSettings):
     AWS_S3_BUCKET: Optional[str] = None
     AWS_DEFAULT_REGION: Optional[str] = None
 
-    #MAIL SETTINGS
+    # MAIL SETTINGS
     MAILTRAP_HOST: str
     MAILTRAP_PORT: int
     MAILTRAP_USER: str
@@ -43,10 +44,8 @@ class Settings(BaseSettings):
     RABBITMQ_URL: str
 
     model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra='ignore'
+        env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
 
-settings = Settings()
 
+settings = Settings()

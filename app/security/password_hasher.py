@@ -1,10 +1,4 @@
-from datetime import datetime, timedelta
-from typing import Optional
-from fastapi import HTTPException
-from jose import JWTError, jwt, ExpiredSignatureError
 from passlib.hash import argon2
-from app.config.settings import settings
-from app.core.enums import UserRole
 
 
 class PasswordHasher:
@@ -28,4 +22,3 @@ class PasswordHasher:
         :return: verify the hashed password against the plain text and return True or False
         """
         return argon2.verify(plain_password, hashed_password)
-

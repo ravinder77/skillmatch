@@ -1,6 +1,7 @@
-from jose import jwt, ExpiredSignatureError
 from datetime import datetime, timedelta
 from typing import Any, Dict
+
+from jose import ExpiredSignatureError, jwt
 
 from app.config.settings import settings
 
@@ -8,11 +9,12 @@ from app.config.settings import settings
 class TokenManager:
     """Manages JWT token generation and validation."""
 
-    def __init__(self,
-                 refresh_secret_key: str = settings.REFRESH_TOKEN_SECRET,
-                 access_secret_key: str = settings.ACCESS_TOKEN_SECRET,
-                 algorithm: str = settings.ALGORITHM
-                 ):
+    def __init__(
+        self,
+        refresh_secret_key: str = settings.REFRESH_TOKEN_SECRET,
+        access_secret_key: str = settings.ACCESS_TOKEN_SECRET,
+        algorithm: str = settings.ALGORITHM,
+    ):
         self.refresh_secret_key = refresh_secret_key
         self.access_secret_key = access_secret_key
         self.algorithm = algorithm
@@ -49,4 +51,3 @@ class TokenManager:
             return True
         except ValueError:
             return False
-

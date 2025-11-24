@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 from starlette import status
+
 from app.repositories.user_repository import UserRepository
 from app.schemas.auth import Tokens
 from app.security.password_hasher import PasswordHasher
@@ -14,20 +15,21 @@ class AuthService:
 
     async def authenticate_user(self, email: str, password: str) -> Tokens:
         """
-          Returns access_token and refresh_token for a user
-          """
+        Returns access_token and refresh_token for a user
+        """
         user = await self.user_repo.get_by_email(email)
 
-        if not user or not self.password_hasher.verify(password, str(user.password_hash)):
+        if not user or not self.password_hasher.verify(
+            password, str(user.password_hash)
+        ):
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid Credentials"
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Credentials"
             )
 
         if not user.is_active:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="User account is not active"
+                detail="User account is not active",
             )
 
         payload = {
@@ -37,7 +39,6 @@ class AuthService:
 
         access_token = self.token_manager.create_access_token(payload)
         refresh_token = self.token_manager.create_refresh_token(payload)
-
 
         return Tokens(
             access_token=access_token,
@@ -57,8 +58,7 @@ class AuthService:
 
         if not user:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="User not found"
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"
             )
         new_payload = {
             "sub": str(user.id),

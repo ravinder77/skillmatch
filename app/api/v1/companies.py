@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
 from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 
 from app.dependencies.auth import get_current_user
@@ -10,11 +11,12 @@ from app.services.company_service import CompanyService
 
 router = APIRouter()
 
+
 @router.post("/create", status_code=status.HTTP_201_CREATED)
 async def create_company(
-        data: CompanyCreate,
-        company_service: Annotated[CompanyService, Depends(get_company_service)],
-        current_user: Annotated[User, Depends(get_current_user)],
+    data: CompanyCreate,
+    company_service: Annotated[CompanyService, Depends(get_company_service)],
+    current_user: Annotated[User, Depends(get_current_user)],
 ):
     """Create a new company"""
 
@@ -22,10 +24,12 @@ async def create_company(
     return company
 
 
-@router.get("/{company_id}", response_model=CompanyResponse, status_code=status.HTTP_200_OK)
+@router.get(
+    "/{company_id}", response_model=CompanyResponse, status_code=status.HTTP_200_OK
+)
 async def get_company_by_id(
-        company_id: int,
-        company_service: Annotated[CompanyService, Depends(get_company_service)]
+    company_id: int,
+    company_service: Annotated[CompanyService, Depends(get_company_service)],
 ):
     """Get a company by id"""
     company = await company_service.get_company_by_id(company_id)

@@ -1,29 +1,29 @@
 import time
+
 import uvicorn
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app.api.api_router import api_router
 from app.config.settings import settings
-from app.core.middleware import register_middlewares
 from app.core.lifespan import lifespan
-from dotenv import load_dotenv
 from app.core.logging_config import setup_logging
+from app.core.middleware import register_middlewares
 
-#load env variables
+# load env variables
 load_dotenv()
 
-#setup logging
+# setup logging
 setup_logging()
 
-app = FastAPI(title='Skillmatch Job board api', version="1.0.0", lifespan=lifespan)
-
+app = FastAPI(title="Skillmatch Job board api", version="1.0.0", lifespan=lifespan)
 
 
 # Register Middleware
 register_middlewares(app)
 
-#Routers
+# Routers
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
@@ -47,6 +47,7 @@ async def global_exception_handler(request: Request, exc: Exception):
         },
     )
 
+
 @app.get("/")
 async def root():
     """
@@ -59,6 +60,7 @@ async def root():
         "docs_url": "/docs" if settings.ENVIRONMENT != "production" else None,
         "api_prefix": settings.API_V1_STR,
     }
+
 
 @app.get("/health")
 async def health_check():

@@ -1,13 +1,16 @@
-from app.config.settings import settings
 from email.mime.text import MIMEText
+
 import aiosmtplib
 
-async def send_email(recipient:str, subject: str, body: str):
+from app.config.settings import settings
+
+
+async def send_email(recipient: str, subject: str, body: str):
     """Send the Email to the recipient."""
     message = MIMEText(body)
-    message['From'] = settings.SENDER_EMAIL
-    message['To'] = recipient
-    message['Subject'] = subject
+    message["From"] = settings.SENDER_EMAIL
+    message["To"] = recipient
+    message["Subject"] = subject
 
     await aiosmtplib.send(
         message,
@@ -17,6 +20,3 @@ async def send_email(recipient:str, subject: str, body: str):
         password=settings.MAILTRAP_PASS,
         start_tls=False,
     )
-
-
-

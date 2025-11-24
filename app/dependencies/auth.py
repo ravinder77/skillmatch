@@ -1,10 +1,12 @@
 from typing import Annotated
+
 from fastapi import Depends, HTTPException
-from starlette import status
 from fastapi.security import OAuth2PasswordBearer
-from app.dependencies.user import get_user_service, get_user_repository
-from app.models.user import User
+from starlette import status
+
 from app.core.enums import UserRole
+from app.dependencies.user import get_user_repository, get_user_service
+from app.models.user import User
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserResponse
 from app.security.token_manager import TokenManager
@@ -13,9 +15,10 @@ from app.services.user_service import UserService
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
+
 async def get_current_user(
-        token: Annotated[str, Depends(oauth2_scheme)],
-        user_service: Annotated[UserService, Depends(get_user_service)],
+    token: Annotated[str, Depends(oauth2_scheme)],
+    user_service: Annotated[UserService, Depends(get_user_service)],
 ) -> UserResponse:
     """
     Dependency that extracts the current user from the JWT token.
@@ -34,9 +37,8 @@ async def get_current_user(
     return user
 
 
-
 async def get_current_employer(
-    current_user: Annotated[User, Depends(get_current_user)]
+    current_user: Annotated[User, Depends(get_current_user)],
 ) -> User:
     """Ensure the current user is an employer."""
     if current_user.role != UserRole.EMPLOYER:
@@ -47,5 +49,7 @@ async def get_current_employer(
     return current_user
 
 
-async def get_auth_service(repo: Annotated[UserRepository, Depends(get_user_repository)]) -> AuthService:
+async def get_auth_service(
+    repo: Annotated[UserRepository, Depends(get_user_repository)],
+) -> AuthService:
     return AuthService(repo)

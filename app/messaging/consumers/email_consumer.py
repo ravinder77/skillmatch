@@ -1,19 +1,22 @@
 import asyncio
 import json
+
 import aio_pika
+
 from app.config.settings import settings
 from app.services.email_service import send_email
+
 
 async def process_message(message: aio_pika.IncomingMessage):
     async with message.process():
         data = json.loads(message.body.decode())
-        await send_email(data['email'], data['subject'], data['body'])
+        await send_email(data["email"], data["subject"], data["body"])
 
 
 async def start_email_consumer():
     connection = await aio_pika.connect_robust(settings.RABBITMQ_URL)
     channel = await connection.channel()
-    await channel.set_qos(prefetch_count=10) # handle 10 messages at a time
+    await channel.set_qos(prefetch_count=10)  # handle 10 messages at a time
 
     queue = await channel.declare_queue("email_queue", durable=True)
 
@@ -27,8 +30,5 @@ async def start_email_consumer():
         await connection.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(start_email_consumer())
-
-
-

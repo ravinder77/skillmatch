@@ -1,11 +1,13 @@
-from typing import Generic, TypeVar, Type, List, Optional, Protocol
+from typing import Generic, List, Optional, Protocol, Type, TypeVar
 
 from fastapi import HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models.base import Base
 
-ModelType = TypeVar('ModelType', bound=Base)
+ModelType = TypeVar("ModelType", bound=Base)
+
 
 class BaseRepository(Generic[ModelType]):
 
@@ -13,7 +15,7 @@ class BaseRepository(Generic[ModelType]):
         self.model = model
         self.db = db
 
-    async def get(self,  obj_id: int) -> Optional[ModelType]:
+    async def get(self, obj_id: int) -> Optional[ModelType]:
         stmt = select(self.model).where(self.model.id == obj_id)
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
@@ -34,7 +36,9 @@ class BaseRepository(Generic[ModelType]):
         """Update a record by ID"""
         db_obj = await self.get(obj_id)
         if not db_obj:
-            raise HTTPException(status_code=404, detail=f"{self.model.__name__} not found")
+            raise HTTPException(
+                status_code=404, detail=f"{self.model.__name__} not found"
+            )
         for field, value in update_data.items():
             setattr(db_obj, field, value)
         self.db.add(db_obj)
@@ -50,17 +54,3 @@ class BaseRepository(Generic[ModelType]):
         await self.db.delete(db_obj)
         await self.db.commit()
         return True
-
-
-
-
-
-
-
-
-
-
-
-
-
-

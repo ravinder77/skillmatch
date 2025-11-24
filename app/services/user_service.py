@@ -1,7 +1,8 @@
 from fastapi import HTTPException
+
+from app.models import User
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
-from app.models import User
 from app.security.password_hasher import PasswordHasher
 
 
@@ -14,7 +15,9 @@ class UserService:
         # check if user already exist
         existing_user = await self.user_repo.get_by_email(str(user_data.email))
         if existing_user:
-            raise HTTPException(status_code=400, detail="User with this email already registered")
+            raise HTTPException(
+                status_code=400, detail="User with this email already registered"
+            )
         # hash password
         hashed_pw = self.password_hasher.hash(user_data.password)
         # build orm model
@@ -22,7 +25,7 @@ class UserService:
             first_name=user_data.first_name,
             last_name=user_data.last_name,
             email=str(user_data.email),
-            password_hash= hashed_pw,
+            password_hash=hashed_pw,
             role=user_data.role,
         )
         # persist to repository
@@ -43,14 +46,9 @@ class UserService:
             raise HTTPException(status_code=404, detail="User not found")
         return UserResponse.model_validate(existing_user)
 
-
     async def update_user(self, user_id: int, user_data: UserUpdate) -> UserResponse:
         # convert to dict and pass only those fields that were provided
         data = user_data.model_dump(exclude_unset=True)
 
         updated_user = await self.user_repo.update(user_id, data)
         return UserResponse.model_validate(updated_user)
-
-
-
-

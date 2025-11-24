@@ -1,20 +1,24 @@
 from enum import Enum
 
+
 class UserRole(str, Enum):
     APPLICANT = "applicant"
     EMPLOYER = "employer"
     ADMIN = "admin"
+
 
 class EmployerRole(str, Enum):
     ADMIN = "admin"
     MANAGER = "manager"
     RECRUITER = "recruiter"
 
+
 # Project Status Enum
 class ProjectStatus(str, Enum):
     IN_PROGRESS = "in-progress"
     COMPLETED = "completed"
     PLANNED = "planned"
+
 
 class ApplicationStatus(str, Enum):
     APPLIED = "applied"
@@ -24,15 +28,18 @@ class ApplicationStatus(str, Enum):
     REJECTED = "rejected"
     WITHDRAWN = "withdrawn"
 
+
 class JobType(Enum):
     FULL_TIME = "full-time"
     PART_TIME = "part-Time"
     CONTRACT = "contract"
 
+
 class JobStatus(Enum):
     OPEN = "open"
     CLOSED = "closed"
     PAUSED = "paused"
+
 
 class CompanySize(Enum):
     SMALL = "1-50"

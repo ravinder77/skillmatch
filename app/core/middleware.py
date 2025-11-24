@@ -1,12 +1,14 @@
 import time
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+
 from app.config.settings import settings
 
 
 async def logging_middleware(request: Request, call_next):
-    """ Logs method, path and execution time for each request """
+    """Logs method, path and execution time for each request"""
     start_time = time.time()
     method = request.method
     response = await call_next(request)

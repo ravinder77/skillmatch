@@ -21,8 +21,8 @@ class CompanyService:
         existing_company = await self.company_repo.get_by_name(normalized_name)
         if existing_company:
             raise HTTPException(
-                status_code=400,
-                detail=f"Company with name {data.name} already exists")
+                status_code=400, detail=f"Company with name {data.name} already exists"
+            )
 
         company = Company(
             name=normalized_name,
@@ -41,26 +41,24 @@ class CompanyService:
         company = await self.company_repo.get_by_id(company_id)
         if not company:
             raise HTTPException(
-                status_code=404,
-                detail=f"Company with id {company_id} does not exist"
+                status_code=404, detail=f"Company with id {company_id} does not exist"
             )
         return company
 
-    #TODO: Add Pagination
+    # TODO: Add Pagination
     async def get_all_companies(self) -> List[Company]:
         """Get all companies"""
         companies = await self.company_repo.get_all()
         return companies
 
-    async def update_company(self, company_id: int, company_data: CompanyUpdate) -> Company:
-        """Update company """
+    async def update_company(
+        self, company_id: int, company_data: CompanyUpdate
+    ) -> Company:
+        """Update company"""
         # check if a company exist
         existing_company = await self.company_repo.get_by_id(company_id)
         if not existing_company:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Company does not exist"
-            )
+            raise HTTPException(status_code=404, detail=f"Company does not exist")
         # pass only those fields which are provided by user
         updates = company_data.model_dump(exclude_unset=True)
         return await self.company_repo.update(existing_company, updates)

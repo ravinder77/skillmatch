@@ -1,6 +1,8 @@
-from typing import Optional
-from pydantic import BaseModel, HttpUrl, ConfigDict
 from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel, ConfigDict, HttpUrl
+
 from app.core.enums import ApplicationStatus
 
 
@@ -9,11 +11,12 @@ class JobApplicationCreate(BaseModel):
     resume_url: Optional[HttpUrl] = None
 
     model_config = ConfigDict(
-        from_attributes= True,
+        from_attributes=True,
         validate_by_name=True,
         validate_by_alias=True,
         use_enum_values=True,
     )
+
 
 class JobApplicationResponse(BaseModel):
     id: int
@@ -22,10 +25,8 @@ class JobApplicationResponse(BaseModel):
     applied_at: datetime
 
     model_config = ConfigDict(
-        from_attributes= True,
+        from_attributes=True,
         validate_by_name=True,
         validate_by_alias=True,
         use_enum_values=True,
     )
-
-

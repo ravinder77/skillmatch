@@ -1,7 +1,8 @@
-from sqlalchemy import select, delete
 from fastapi import HTTPException
+from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models.user import User
 from app.repositories.base import BaseRepository
 
@@ -39,7 +40,6 @@ class UserRepository(BaseRepository[User]):
         await self.db.execute(stmt)
         await self.db.commit()
 
-
     async def update(self, user_id: int, user_data: dict) -> User:
 
         db_user = await self.get_by_id(user_id)
@@ -52,15 +52,3 @@ class UserRepository(BaseRepository[User]):
         await self.db.commit()
         await self.db.refresh(db_user)
         return db_user
-
-
-
-
-
-
-
-
-
-
-
-

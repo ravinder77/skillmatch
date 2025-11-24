@@ -1,9 +1,10 @@
 from typing import List
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 
-from app.repositories.base import BaseRepository
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models import Company
+from app.repositories.base import BaseRepository
 
 
 class CompanyRepository(BaseRepository[Company]):
@@ -26,12 +27,10 @@ class CompanyRepository(BaseRepository[Company]):
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
-
     async def get_by_id(self, company_id: int) -> Company | None:
         stmt = select(Company).where(Company.id == company_id)
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
-
 
     async def get_all(self) -> List[Company]:
         stmt = select(Company).order_by(Company.id.desc())
@@ -51,16 +50,3 @@ class CompanyRepository(BaseRepository[Company]):
         if company:
             await self.db.delete(company)
             await self.db.commit()
-
-
-
-
-
-
-
-
-
-
-
-
-

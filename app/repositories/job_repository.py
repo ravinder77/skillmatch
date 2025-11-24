@@ -1,8 +1,9 @@
+from typing import List, Optional
+
+from fastapi import HTTPException
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from fastapi import HTTPException
-from typing import Optional, List
 
 from app.models.job import Job
 from app.repositories.base import BaseRepository
@@ -14,7 +15,7 @@ class JobRepository(BaseRepository[Job]):
         self.db = db
 
     async def create(self, job: Job) -> Job:
-        """Create a job in the database """
+        """Create a job in the database"""
         try:
             self.db.add(job)
             await self.db.commit()
@@ -23,23 +24,26 @@ class JobRepository(BaseRepository[Job]):
         except Exception as err:
             await self.db.rollback()
             print(err)
-            raise HTTPException(status_code=500, detail="Internal Server Error while creating job")
+            raise HTTPException(
+                status_code=500, detail="Internal Server Error while creating job"
+            )
 
     async def get_by_id(self, job_id: int) -> Optional[Job]:
-        """ Get a job by id """
+        """Get a job by id"""
         query = select(Job).where(Job.id == job_id)
         result = await self.db.execute(query)
         return result.scalars().first()
 
     async def get_all(
-            self,
-            page: int,
-            limit: int,
-            search: Optional[str],
-            location: Optional[str],
-            job_type: Optional[str],
-            experience: Optional[str]) -> List[Job]:
-        """ Fetch all jobs with pagination """
+        self,
+        page: int,
+        limit: int,
+        search: Optional[str],
+        location: Optional[str],
+        job_type: Optional[str],
+        experience: Optional[str],
+    ) -> List[Job]:
+        """Fetch all jobs with pagination"""
         # base query
         query = select(Job).where(Job.is_active == True)
 
@@ -56,10 +60,10 @@ class JobRepository(BaseRepository[Job]):
             )
 
         if job_type:
-            query = query.where(Job.job_type == job_type),
+            query = (query.where(Job.job_type == job_type),)
 
         if experience:
-            query = query.where(Job.experience_required == experience),
+            query = (query.where(Job.experience_required == experience),)
 
         # --pagination--
         offset = (page - 1) * limit
@@ -85,7 +89,9 @@ class JobRepository(BaseRepository[Job]):
             raise HTTPException(status_code=400, detail="Invalid data")
         except Exception:
             await self.db.rollback()
-            raise HTTPException(status_code=500, detail="Internal Server Error while updating job")
+            raise HTTPException(
+                status_code=500, detail="Internal Server Error while updating job"
+            )
 
     async def delete(self, job_id: int) -> bool:
         db_job = await self.get_by_id(job_id)
@@ -102,7 +108,3 @@ class JobRepository(BaseRepository[Job]):
         )
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
-
-
-
-

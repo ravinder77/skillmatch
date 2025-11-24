@@ -1,6 +1,8 @@
 from typing import List, Optional
+
 from fastapi import HTTPException
 from starlette import status
+
 from app.models.job import Job
 from app.repositories.job_repository import JobRepository
 from app.schemas.job import JobCreate, JobResponse
@@ -11,8 +13,14 @@ class JobService:
         self.job_repo = job_repo
 
     async def create_job(self, job_in: JobCreate, employer_id: int) -> JobResponse:
-        if job_in.min_salary and job_in.max_salary and job_in.min_salary > job_in.max_salary:
-            raise HTTPException(status_code=400, detail="min_salary cannot be greater than max_salary.")
+        if (
+            job_in.min_salary
+            and job_in.max_salary
+            and job_in.min_salary > job_in.max_salary
+        ):
+            raise HTTPException(
+                status_code=400, detail="min_salary cannot be greater than max_salary."
+            )
 
         new_job = Job(
             title=job_in.title,
@@ -30,13 +38,13 @@ class JobService:
 
     # TODO: add pagination
     async def get_all_active_jobs(
-            self,
-            page: int,
-            limit: int,
-            search: Optional[str],
-            location: Optional[str],
-            job_type: Optional[str],
-            experience: Optional[str],
+        self,
+        page: int,
+        limit: int,
+        search: Optional[str],
+        location: Optional[str],
+        job_type: Optional[str],
+        experience: Optional[str],
     ) -> List[Job]:
 
         jobs = await self.job_repo.get_all(
@@ -45,7 +53,7 @@ class JobService:
             search=search,
             location=location,
             job_type=job_type,
-            experience=experience
+            experience=experience,
         )
         if not jobs or len(jobs) == 0:
             raise HTTPException(
@@ -56,14 +64,16 @@ class JobService:
 
     #
     async def get_job_by_id(self, job_id: int) -> JobResponse:
-        """ Retrieve a job by its ID or raise 404 if not found. """
+        """Retrieve a job by its ID or raise 404 if not found."""
         job = await self.job_repo.get_by_id(job_id)
         if not job:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Job not found"
+            )
         return JobResponse.model_validate(job)
 
     async def delete_job(self, job_id: int, employer_id) -> None:
-        """ Delete a job if the employer owns it. """
+        """Delete a job if the employer owns it."""
         job = await self.job_repo.get_job_by_employer_id(job_id, employer_id)
         if not job or job.employer_id != employer_id:
             raise HTTPException(status_code=404, detail="Job not found.")
@@ -75,6 +85,8 @@ class JobService:
         if not job:
             raise HTTPException(status_code=404, detail="Job not found.")
         if job.employer_id != employer_id:
-            raise HTTPException(status_code=401, detail="You are not allowed to edit this job.")
+            raise HTTPException(
+                status_code=401, detail="You are not allowed to edit this job."
+            )
         updated_job = await self.job_repo.update(job_id, job_data)
         return updated_job

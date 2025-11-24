@@ -1,6 +1,7 @@
-
-from pydantic import BaseModel, HttpUrl, ConfigDict
 from typing import Optional
+
+from pydantic import BaseModel, ConfigDict, HttpUrl
+
 
 class CandidateProfileCreate(BaseModel):
     profile_image_url: Optional[str]
@@ -18,6 +19,7 @@ class CandidateProfileCreate(BaseModel):
         validate_by_alias=True,
         from_attributes=True,
     )
+
 
 class CandidateProfileUpdate(BaseModel):
     profile_image_url: Optional[HttpUrl]
@@ -49,12 +51,10 @@ class CandidateProfileResponse(BaseModel):
     slug: str
     is_public: bool
 
-
     model_config = ConfigDict(
         from_attributes=True,
         validate_by_name=True,
         validate_by_alias=True,
-
     )
 
 
@@ -73,4 +73,3 @@ class CandidateProfilePublicView(BaseModel):
         validate_by_name=True,
         validate_by_alias=True,
     )
-

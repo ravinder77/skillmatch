@@ -1,7 +1,10 @@
-from typing import Optional
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
-from app.core.enums import UserRole
 from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
+from app.core.enums import UserRole
+
 
 # Shared attributes
 class UserBase(BaseModel):
@@ -12,12 +15,13 @@ class UserBase(BaseModel):
     location: Optional[str] = None
     role: UserRole = UserRole.APPLICANT
 
+
 # ===========
 # Create User Schema
 # ===========
 class UserCreate(BaseModel):
     email: EmailStr
-    first_name: str = Field( min_length=3, max_length=32)
+    first_name: str = Field(min_length=3, max_length=32)
     last_name: str = Field(min_length=3, max_length=32)
     password: str = Field(
         min_length=7,
@@ -34,7 +38,6 @@ class UserCreate(BaseModel):
         use_enum_values=True,
         validate_by_name=True,
         validate_by_alias=True,
-
     )
 
 
@@ -69,5 +72,5 @@ class UserResponse(UserBase):
         from_attributes=True,
         extra="forbid",
         validate_by_name=True,
-        use_enum_values=True
+        use_enum_values=True,
     )
