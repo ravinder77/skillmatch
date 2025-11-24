@@ -1,7 +1,7 @@
 # ===============================
 # 1️⃣ Base image
 # ===============================
-FROM python:3.14-slim AS base
+FROM python:3.13-slim AS base
 
 # Environment setup
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -10,13 +10,18 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # Working directory
 WORKDIR /app
 
+RUN pip install uv
+
 # ===============================
 # 3️⃣ Install Python dependencies
 # ===============================
-COPY requirements.txt .
+COPY pyproject.toml uv.lock ./
 
 # Force clean, cache-free dependency install
-RUN uv sync --no-cache
+RUN uv sync --frozen
+
+# Make uv's venv available globally
+ENV PATH="/app/.venv/bin:$PATH"
 
 # ===============================
 # 4️⃣ Copy app source
