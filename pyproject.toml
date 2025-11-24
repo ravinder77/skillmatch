@@ -1,0 +1,51 @@
+[project]
+name = "skillmatch"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "asyncpg>=0.30.0",
+    "booktype>=1.5",
+    "boto3>=1.41.2",
+    "botocore>=1.41.2",
+    "email-validator>=2.3.0",
+    "fastapi>=0.121.3",
+    "httpx>=0.28.1",
+    "openai>=2.8.1",
+    "passlib[argon2]>=1.7.4",
+    "pydantic[email]>=2.11.0",
+    "pydantic-settings>=2.12.0",
+    "pytest>=9.0.1",
+    "python-dotenv>=1.2.1",
+    "python-jose>=3.5.0",
+    "sqlalchemy[asyncio]>=2.0.43",
+    "starlette>=0.50.0",
+    "uvicorn>=0.38.0",
+    "python-multipart>=0.0.20",
+    "bcrypt>=5.0.0",
+    "jinja2>=3.1.6",
+    "greenlet>=3.2.4",
+    "aio-pika>=9.5.8",
+    "aiosmtplib>=5.0.0",
+    "pyjwt>=2.10.1",
+    "redis>=7.1.0",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py313']  # Adjust to your Python version
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"          # Makes isort compatible with Black
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+
+[dependency-groups]
+dev = [
+    "black>=25.11.0",
+    "isort>=7.0.0",
+]
+
