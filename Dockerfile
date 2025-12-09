@@ -17,7 +17,7 @@ RUN pip install uv
 # ===============================
 COPY pyproject.toml uv.lock ./
 
-# Force clean, cache-free dependency install
+
 RUN uv sync --frozen
 
 # Make uv's venv available globally

@@ -39,8 +39,6 @@ services:
     networks:
       - skillmatch_net
 
-
-
   # Rabbitmq
   rabbitmq:
     image: rabbitmq:4-management

@@ -61,5 +61,5 @@ def user_payload():
         "last_name": "singh",
         "email": "ravinder@gmail.com",
         "password": "ravinder123",
-        "role": UserRole.CANDIDATE.value,
+        "role": UserRole.APPLICANT.value,
     }

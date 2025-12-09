@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 
+from app.messaging.producers.email_producer import publish_email_message
 from app.models import User
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
@@ -30,6 +31,12 @@ class UserService:
         )
         # persist to repository
         new_user = await self.user_repo.create_user(user)
+
+        await publish_email_message(
+            email=str(new_user.email),
+            subject="Welcome email.",
+            body=f"Hello {new_user.first_name} {new_user.last_name}, Welcome, thanks for on boarding with us.",
+        )
         return UserResponse.model_validate(new_user)
 
     async def get_user_by_email(self, email: str) -> UserResponse:

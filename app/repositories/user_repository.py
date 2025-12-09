@@ -18,12 +18,12 @@ class UserRepository(BaseRepository[User]):
             await self.db.commit()
             await self.db.refresh(user)
             return user
-        except IntegrityError:
+        except IntegrityError as e:
             await self.db.rollback()
-            raise HTTPException(status_code=400, detail="User not found")
-        except Exception:
+            raise e
+        except Exception as e:
             await self.db.rollback()
-            raise HTTPException(status_code=500, detail="Internal Server Error")
+            raise e
 
     async def get_by_id(self, user_id: int) -> User | None:
         stmt = select(User).where(User.id == user_id)
