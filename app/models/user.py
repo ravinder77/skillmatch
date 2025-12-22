@@ -1,15 +1,15 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, List, Optional
 
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, Enum, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.enums import UserRole
 from app.db.mixins import SoftDeleteMixin, TimestampMixin
-from app.models.base import Base
+from app.db.base import Base
 
 if TYPE_CHECKING:
-    from app.models import Application, Company, EmployerProfile, Job
+    from app.models import Application, EmployerProfile
 
 
 # User Model

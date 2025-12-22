@@ -68,11 +68,10 @@ async def health_check():
     Health check monitoring endpoint.
     :return: {
     "status": "ok",
-    "timestamp": time.ctime(time.time()),
     }
     """
     return JSONResponse({"status": "ok"})
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

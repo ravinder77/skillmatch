@@ -17,10 +17,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.enums import JobType
 from app.db.mixins import TimestampMixin
 from app.models import EmployerProfile
-from app.models.base import Base
+from app.db.base import Base
 
 if TYPE_CHECKING:
-    from app.models import Application, Company, User
+    from app.models import Application, Company
 
 
 class Job(Base, TimestampMixin):

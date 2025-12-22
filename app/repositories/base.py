@@ -1,10 +1,10 @@
-from typing import Generic, List, Optional, Protocol, Type, TypeVar
+from typing import Generic, List, Optional, Type, TypeVar
 
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.base import Base
+from app.db.base import Base
 
 ModelType = TypeVar("ModelType", bound=Base)
 
