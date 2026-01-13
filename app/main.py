@@ -6,7 +6,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app.api.api_router import api_router
-from app.config.settings import settings
+from app.core.settings import settings
 from app.core.lifespan import lifespan
 from app.core.logging_config import setup_logging
 from app.core.middleware import register_middlewares

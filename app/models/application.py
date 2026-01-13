@@ -5,7 +5,7 @@ from sqlalchemy import DateTime, Enum, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.enums import ApplicationStatus
-from app.db.mixins import TimestampMixin
+from app.models.mixins import TimestampMixin
 from app.db.base import Base
 
 if TYPE_CHECKING:

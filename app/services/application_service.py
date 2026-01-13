@@ -3,7 +3,7 @@ from typing import List, Optional
 from fastapi import HTTPException
 from starlette import status
 
-from app.config.settings import settings
+from app.core.settings import settings
 from app.models.application import Application
 from app.repositories.application_repository import ApplicationRepository
 from app.repositories.job_repository import JobRepository

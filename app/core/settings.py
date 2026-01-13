@@ -4,10 +4,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-
     # CORE
     API_V1_STR: str = "/api"
-    PROJECT_NAME: str
+    PROJECT_NAME: str = 'skillmatch'
     VERSION: str = "0.1.0"
     DEBUG: bool = True
     ENVIRONMENT: str = "development"
@@ -44,7 +43,9 @@ class Settings(BaseSettings):
     RABBITMQ_URL: str
 
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", extra="ignore"
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore"
     )
 
 

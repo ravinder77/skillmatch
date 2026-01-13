@@ -5,7 +5,7 @@ from sqlalchemy import Boolean, DateTime, Enum, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.enums import UserRole
-from app.db.mixins import SoftDeleteMixin, TimestampMixin
+from app.models.mixins import SoftDeleteMixin, TimestampMixin
 from app.db.base import Base
 
 if TYPE_CHECKING:

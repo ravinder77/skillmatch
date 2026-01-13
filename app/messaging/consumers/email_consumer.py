@@ -3,7 +3,7 @@ import json
 
 import aio_pika
 
-from app.config.settings import settings
+from app.core.settings import settings
 from app.services.email_service import send_email
 
 

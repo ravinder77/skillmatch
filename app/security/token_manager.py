@@ -3,7 +3,7 @@ from typing import Any, Dict
 
 from jose import ExpiredSignatureError, jwt
 
-from app.config.settings import settings
+from app.core.settings import settings
 
 
 class TokenManager:

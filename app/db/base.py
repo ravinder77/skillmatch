@@ -1,8 +1,8 @@
-from sqlalchemy import Integer
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlmodel import SQLModel
 
+# Import ALL models here
+from app.models.user import User
 
-class Base(DeclarativeBase):
-    pass
-
+# Expose metadata
+metadata = SQLModel.metadata
 

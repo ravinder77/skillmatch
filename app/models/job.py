@@ -15,7 +15,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.enums import JobType
-from app.db.mixins import TimestampMixin
+from app.models.mixins import TimestampMixin
 from app.models import EmployerProfile
 from app.db.base import Base
 

@@ -7,7 +7,7 @@ from app.messaging.connection import get_connection
 
 async def publish_email_message(email, subject, body):
     """
-    Publish a json message to a durable queue using the default exchange.
+    Publish a JSON message to a durable queue using the default exchange.
     """
     connection = await get_connection()
     channel = await connection.channel()
